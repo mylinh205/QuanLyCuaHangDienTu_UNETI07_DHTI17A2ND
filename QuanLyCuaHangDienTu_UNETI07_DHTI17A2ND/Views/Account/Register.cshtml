@@ -1,0 +1,69 @@
+﻿@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<!-- Họ tên: Đào Minh Long - MSV: 23203100068 -->
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">ĐĂNG KÝ TÀI KHOẢN MỚI</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label"></label>
+                        <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập..." />
+                        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MatKhau" class="form-label"></label>
+                            <input asp-for="MatKhau" class="form-control" placeholder="Mật khẩu..." />
+                            <span asp-validation-for="MatKhau" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="XacNhanMatKhau" class="form-label"></label>
+                            <input asp-for="XacNhanMatKhau" class="form-control" placeholder="Xác nhận mật khẩu..." />
+                            <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="HoTen" class="form-label"></label>
+                        <input asp-for="HoTen" class="form-control" placeholder="Nhập họ và tên..." />
+                        <span asp-validation-for="HoTen" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SoDienThoai" class="form-label"></label>
+                            <input asp-for="SoDienThoai" class="form-control" placeholder="09xxxxxxxx" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2 mt-2">Hoàn tất Đăng ký</button>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <span>Đã có tài khoản? </span><a asp-action="Login">Đăng nhập ngay</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
