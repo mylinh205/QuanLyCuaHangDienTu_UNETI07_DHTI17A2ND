@@ -1,37 +1,44 @@
-﻿@* SV Thực hiện: Đào Minh Long - MSV: 23203100068 *@
-@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.LoginViewModel
+﻿@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.LoginViewModel
 @{
-    ViewData["Title"] = "Đăng nhập";
+    ViewData["Title"] = "Đăng nhập hệ thống";
 }
 
+<!-- SV Thực hiện: Đào Minh Long - MSV: 23203100068 -->
 <div class="row justify-content-center mt-5">
     <div class="col-md-5">
-        <div class="card shadow-sm">
+        <div class="card shadow">
             <div class="card-header bg-primary text-white text-center">
                 <h4 class="mb-0">ĐĂNG NHẬP HỆ THỐNG</h4>
             </div>
             <div class="card-body">
-                @if (TempData["Success"] != null)
+                @if (ViewBag.Error != null)
                 {
-                    <div class="alert alert-success">@TempData["Success"]</div>
+                    <div class="alert alert-danger" role="alert">
+                        @ViewBag.Error
+                    </div>
                 }
+
                 <form asp-action="Login" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
                     <div class="mb-3">
-                        <label asp-for="TenDangNhap" class="form-label"></label>
-                        <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập" />
+                        <label asp-for="TenDangNhap" class="form-label">Tên đăng nhập</label>
+                        <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập..." />
                         <span asp-validation-for="TenDangNhap" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
-                        <label asp-for="MatKhau" class="form-label"></label>
-                        <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu" />
+                        <label asp-for="MatKhau" class="form-label">Mật khẩu</label>
+                        <input asp-for="MatKhau" type="password" class="form-control" placeholder="Nhập mật khẩu..." />
                         <span asp-validation-for="MatKhau" class="text-danger"></span>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 py-2">Đăng nhập</button>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Đăng nhập</button>
                 </form>
             </div>
-            <div class="card-footer text-center">
-                <span>Chưa có tài khoản? </span><a asp-action="Register">Đăng ký ngay</a>
+            <div class="card-footer text-center py-3">
+                <span>Chưa có tài khoản? </span>
+                <a asp-controller="Account" asp-action="Register" class="text-primary fw-bold text-decoration-none">Đăng ký ngay</a>
             </div>
         </div>
     </div>
