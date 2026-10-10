@@ -1,0 +1,37 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.CustomerProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-7 col-lg-6">
+        <h1 class="h3 mb-3">Thông tin cá nhân</h1>
+        @if (TempData["Success"] is string successMessage)
+        {
+            <div class="alert alert-success" role="alert">@successMessage</div>
+        }
+        <form asp-action="Profile" method="post" class="border rounded p-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="mb-3">
+                <label asp-for="HoTen" class="form-label"></label>
+                <input asp-for="HoTen" class="form-control" autocomplete="name" />
+                <span asp-validation-for="HoTen" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="SoDienThoai" class="form-label"></label>
+                <input asp-for="SoDienThoai" class="form-control" autocomplete="tel" />
+                <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-success">Lưu thay đổi</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -1,0 +1,407 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.SanPhamIndexViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    var isAdmin = ViewBag.IsAdmin is bool admin && admin;
+}
+
+@functions {
+    private static Dictionary<string, string> PageRoute(
+        QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.SanPhamIndexViewModel model,
+        int pageIndex)
+    {
+        var route = new Dictionary<string, string>
+        {
+            ["PageIndex"] = pageIndex.ToString(CultureInfo.InvariantCulture),
+            ["PageSize"] = model.PageSize.ToString(CultureInfo.InvariantCulture),
+            ["SortOrder"] = model.SortOrder
+        };
+
+        if (!string.IsNullOrWhiteSpace(model.SearchTerm)) route["SearchTerm"] = model.SearchTerm;
+        if (model.MaLoai.HasValue) route["MaLoai"] = model.MaLoai.Value.ToString(CultureInfo.InvariantCulture);
+        if (!string.IsNullOrWhiteSpace(model.ThuongHieu)) route["ThuongHieu"] = model.ThuongHieu;
+        if (!string.IsNullOrWhiteSpace(model.TrangThai)) route["TrangThai"] = model.TrangThai;
+        if (model.GiaTu.HasValue) route["GiaTu"] = model.GiaTu.Value.ToString(CultureInfo.InvariantCulture);
+        if (model.GiaDen.HasValue) route["GiaDen"] = model.GiaDen.Value.ToString(CultureInfo.InvariantCulture);
+
+        return route;
+    }
+}
+
+<style>
+    .product-page {
+        --ink: #172b3a;
+        --muted: #657786;
+        --line: #dce5e8;
+        --surface: #ffffff;
+        --wash: #f3f7f6;
+        --accent: #087e78;
+        --accent-dark: #07645f;
+        color: var(--ink);
+        padding: 1rem 0 2rem;
+    }
+
+    .product-page .page-heading {
+        align-items: end;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1rem;
+    }
+
+    .product-page h1 {
+        font-size: 1.8rem;
+        font-weight: 750;
+        margin: 0;
+    }
+
+    .product-page .eyebrow {
+        color: var(--accent);
+        font-size: .76rem;
+        font-weight: 700;
+        margin-bottom: .35rem;
+        text-transform: uppercase;
+    }
+
+    .product-page .result-count,
+    .product-page .muted {
+        color: var(--muted);
+    }
+
+    .product-page .filter-panel {
+        background: var(--wash);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+
+    .product-page .form-label {
+        color: #344b59;
+        font-size: .82rem;
+        font-weight: 650;
+        margin-bottom: .35rem;
+    }
+
+    .product-page .form-control,
+    .product-page .form-select {
+        border-color: #cbd8dc;
+        min-height: 42px;
+    }
+
+    .product-page .btn-search {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+        min-height: 42px;
+    }
+
+    .product-page .btn-search:hover {
+        background: var(--accent-dark);
+        border-color: var(--accent-dark);
+        color: white;
+    }
+
+    .product-page .table-wrap {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .product-page .table {
+        margin: 0;
+        min-width: 760px;
+    }
+
+    .product-page .table thead th {
+        background: #eaf1f1;
+        border-bottom: 1px solid var(--line);
+        color: #344b59;
+        font-size: .78rem;
+        font-weight: 700;
+        padding: .8rem .75rem;
+        white-space: nowrap;
+    }
+
+    .product-page .table tbody td {
+        padding: .8rem .75rem;
+        vertical-align: middle;
+    }
+
+    .product-page .product-name {
+        font-weight: 700;
+    }
+
+    .product-page .price {
+        color: var(--accent-dark);
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .product-page .status {
+        border-radius: 999px;
+        display: inline-block;
+        font-size: .76rem;
+        font-weight: 700;
+        padding: .3rem .6rem;
+        white-space: nowrap;
+    }
+
+    .product-page .status-active {
+        background: #d9f2e7;
+        color: #176546;
+    }
+
+    .product-page .status-paused {
+        background: #fff0d4;
+        color: #815400;
+    }
+
+    .product-page .status-stopped {
+        background: #f9e1e0;
+        color: #913f3b;
+    }
+
+    .product-page .pagination .page-link {
+        color: var(--accent-dark);
+    }
+
+    .product-page .pagination .active .page-link {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+    }
+
+    @@media (max-width: 575.98px) {
+        .product-page .page-heading {
+            align-items: start;
+            flex-direction: column;
+        }
+
+        .product-page h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<section class="product-page">
+    <header class="page-heading">
+        <div>
+            <div class="eyebrow">Danh mục hàng hóa</div>
+            <h1>Quản lý sản phẩm</h1>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="result-count">@Model.TotalItems sản phẩm phù hợp</div>
+            @if (isAdmin)
+            {
+                <a asp-action="Create" class="btn btn-search">Thêm sản phẩm</a>
+            }
+        </div>
+    </header>
+
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">@successMessage</div>
+    }
+
+    <form asp-action="Index" method="get" class="filter-panel">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-lg-4">
+                <label asp-for="SearchTerm" class="form-label">Tìm tên hoặc thương hiệu</label>
+                <input asp-for="SearchTerm" class="form-control" placeholder="Nhập từ khóa..." />
+            </div>
+            <div class="col-6 col-lg-2">
+                <label asp-for="MaLoai" class="form-label">Loại sản phẩm</label>
+                <select asp-for="MaLoai" asp-items="ViewBag.MaLoaiList" class="form-select">
+                    <option value="">Tất cả loại</option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label asp-for="ThuongHieu" class="form-label">Thương hiệu</label>
+                <select asp-for="ThuongHieu" class="form-select">
+                    <option value="">Tất cả thương hiệu</option>
+                    @foreach (string brand in ViewBag.ThuongHieuList)
+                    {
+                        <option value="@brand">@brand</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label asp-for="TrangThai" class="form-label">Trạng thái</label>
+                <select asp-for="TrangThai" class="form-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="Đang kinh doanh">Đang kinh doanh</option>
+                    <option value="Tạm ngừng">Tạm ngừng</option>
+                    <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label asp-for="SortOrder" class="form-label">Sắp xếp</label>
+                <select asp-for="SortOrder" class="form-select">
+                    <option value="name_asc">Tên A - Z</option>
+                    <option value="name_desc">Tên Z - A</option>
+                    <option value="price_asc">Giá tăng dần</option>
+                    <option value="price_desc">Giá giảm dần</option>
+                    <option value="stock_asc">Tồn kho tăng dần</option>
+                    <option value="stock_desc">Tồn kho giảm dần</option>
+                </select>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label asp-for="GiaTu" class="form-label">Giá từ</label>
+                <input asp-for="GiaTu" type="number" min="0" step="1000" class="form-control" placeholder="0" />
+            </div>
+            <div class="col-6 col-lg-2">
+                <label asp-for="GiaDen" class="form-label">Giá đến</label>
+                <input asp-for="GiaDen" type="number" min="0" step="1000" class="form-control" placeholder="Không giới hạn" />
+                <span asp-validation-for="GiaDen" class="text-danger small"></span>
+            </div>
+            <div class="col-6 col-lg-2">
+                <label asp-for="PageSize" class="form-label">Số sản phẩm/trang</label>
+                <select asp-for="PageSize" class="form-select">
+                    <option value="6">6</option>
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                </select>
+            </div>
+            <div class="col-12 col-lg-6 d-flex gap-2">
+                <button type="submit" class="btn btn-search px-4">Áp dụng</button>
+                <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center">Xóa bộ lọc</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="table-wrap">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Sản phẩm</th>
+                        <th>Loại</th>
+                        <th>Thương hiệu</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-center">Tồn kho</th>
+                        <th>Trạng thái</th>
+                        @if (isAdmin)
+                        {
+                            <th>Thao tác</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.SanPhams.Count > 0)
+                    {
+                        @foreach (var product in Model.SanPhams)
+                        {
+                            var statusClass = product.TrangThai switch
+                            {
+                                "Đang kinh doanh" => "status-active",
+                                "Tạm ngừng" => "status-paused",
+                                _ => "status-stopped"
+                            };
+                            <tr>
+                                <td class="muted">#@product.MaSanPham</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@product.MaSanPham" class="product-name text-decoration-none text-reset">
+                                        @product.TenSanPham
+                                    </a>
+                                </td>
+                                <td>@(product.LoaiSanPham?.TenLoai ?? "Chưa phân loại")</td>
+                                <td>@product.ThuongHieu</td>
+                                <td class="price text-end">@product.DonGia.ToString("N0") đ</td>
+                                <td class="text-center">@product.SoLuongTon</td>
+                                <td><span class="status @statusClass">@product.TrangThai</span></td>
+                                @if (isAdmin)
+                                {
+                                    <td>
+                                        <div class="d-flex flex-column gap-2">
+                                            <div class="d-flex gap-1">
+                                                <a asp-action="Edit" asp-route-id="@product.MaSanPham" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                                <a asp-action="Delete" asp-route-id="@product.MaSanPham" class="btn btn-sm btn-outline-danger">Xóa</a>
+                                            </div>
+                                            <form asp-action="UpdateStatus" asp-route-id="@product.MaSanPham" method="post" class="d-flex gap-1">
+                                                <select name="status" class="form-select form-select-sm" aria-label="Trạng thái mới của @product.TenSanPham">
+                                                    <option value="Đang kinh doanh" selected="@(product.TrangThai == "Đang kinh doanh")">Đang kinh doanh</option>
+                                                    <option value="Tạm ngừng" selected="@(product.TrangThai == "Tạm ngừng")">Tạm ngừng</option>
+                                                    <option value="Ngừng kinh doanh" selected="@(product.TrangThai == "Ngừng kinh doanh")">Ngừng kinh doanh</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary">Lưu</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="@(isAdmin ? 8 : 7)" class="muted py-5 text-center">Không tìm thấy sản phẩm phù hợp với điều kiện đã chọn.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-3">
+        <div class="muted small">
+            Hiển thị @(Model.TotalItems == 0 ? 0 : (Model.PageIndex - 1) * Model.PageSize + 1)
+            - @Math.Min(Model.PageIndex * Model.PageSize, Model.TotalItems) trong @Model.TotalItems sản phẩm
+        </div>
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Phân trang sản phẩm">
+                <ul class="pagination mb-0">
+                    <li class="page-item @(Model.PageIndex <= 1 ? "disabled" : "")">
+                        @if (Model.PageIndex <= 1)
+                        {
+                            <span class="page-link" aria-disabled="true">Trước</span>
+                        }
+                        else
+                        {
+                            <a class="page-link" asp-action="Index" asp-all-route-data="@(PageRoute(Model, Model.PageIndex - 1))">Trước</a>
+                        }
+                    </li>
+                    @if (Model.PageIndex > 3)
+                    {
+                        <li class="page-item"><a class="page-link" asp-action="Index" asp-all-route-data="@(PageRoute(Model, 1))">1</a></li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+                    @for (var pageNumber = Math.Max(1, Model.PageIndex - 2); pageNumber <= Math.Min(Model.TotalPages, Model.PageIndex + 2); pageNumber++)
+                    {
+                        <li class="page-item @(pageNumber == Model.PageIndex ? "active" : "")" aria-current="@(pageNumber == Model.PageIndex ? "page" : null)">
+                            @if (pageNumber == Model.PageIndex)
+                            {
+                                <span class="page-link">@pageNumber</span>
+                            }
+                            else
+                            {
+                                <a class="page-link" asp-action="Index" asp-all-route-data="@(PageRoute(Model, pageNumber))">@pageNumber</a>
+                            }
+                        </li>
+                    }
+                    @if (Model.PageIndex < Model.TotalPages - 2)
+                    {
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <li class="page-item"><a class="page-link" asp-action="Index" asp-all-route-data="@(PageRoute(Model, Model.TotalPages))">@Model.TotalPages</a></li>
+                    }
+                    <li class="page-item @(Model.PageIndex >= Model.TotalPages ? "disabled" : "")">
+                        @if (Model.PageIndex >= Model.TotalPages)
+                        {
+                            <span class="page-link" aria-disabled="true">Tiếp</span>
+                        }
+                        else
+                        {
+                            <a class="page-link" asp-action="Index" asp-all-route-data="@(PageRoute(Model, Model.PageIndex + 1))">Tiếp</a>
+                        }
+                    </li>
+                </ul>
+            </nav>
+        }
+    </footer>
+</section>

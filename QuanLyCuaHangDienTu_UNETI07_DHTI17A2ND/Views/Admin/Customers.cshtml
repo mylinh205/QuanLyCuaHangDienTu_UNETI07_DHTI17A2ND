@@ -1,0 +1,70 @@
+@model IEnumerable<QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.KhachHang>
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-end gap-3 border-bottom pb-3 mb-3">
+        <div>
+            <div class="text-uppercase text-success fw-semibold small">Quản trị cửa hàng</div>
+            <h1 class="h2 mb-0">Quản lý khách hàng</h1>
+        </div>
+        <a asp-action="Dashboard" class="btn btn-outline-secondary">Dashboard</a>
+    </div>
+
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">@successMessage</div>
+    }
+
+    <div class="table-responsive border rounded">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Khách hàng</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var customer in Model)
+                    {
+                        <tr>
+                            <td>@customer.HoTen</td>
+                            <td>@customer.Email</td>
+                            <td>@customer.SoDienThoai</td>
+                            <td>@(customer.TaiKhoan?.TenDangNhap ?? "—")</td>
+                            <td>
+                                <span class="badge @(customer.TrangThai ? "bg-success" : "bg-secondary")">
+                                    @(customer.TrangThai ? "Hoạt động" : "Đã khóa")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                @if (customer.TaiKhoan != null)
+                                {
+                                    <form asp-action="ToggleCustomerStatus" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@customer.MaKhachHang" />
+                                        <button type="submit" class="btn btn-sm @(customer.TrangThai ? "btn-outline-danger" : "btn-outline-success")">
+                                            @(customer.TrangThai ? "Khóa tài khoản" : "Mở khóa")
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">Chưa có khách hàng nào đăng ký.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

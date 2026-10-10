@@ -1,0 +1,44 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.SanPham
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    var isAdmin = ViewBag.IsAdmin is bool admin && admin;
+}
+
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-xl-9">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+            <div>
+                <div class="text-uppercase small fw-bold text-success">Mã sản phẩm #@Model.MaSanPham</div>
+                <h1 class="h3 mb-0">@Model.TenSanPham</h1>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+        </div>
+
+        <dl class="row g-0 border rounded overflow-hidden">
+            <dt class="col-sm-4 bg-light p-3">Loại sản phẩm</dt>
+            <dd class="col-sm-8 p-3 mb-0">@(Model.LoaiSanPham?.TenLoai ?? "Chưa phân loại")</dd>
+            <dt class="col-sm-4 bg-light p-3">Thương hiệu</dt>
+            <dd class="col-sm-8 p-3 mb-0">@Model.ThuongHieu</dd>
+            <dt class="col-sm-4 bg-light p-3">Xuất xứ</dt>
+            <dd class="col-sm-8 p-3 mb-0">@(Model.XuatXu ?? "Chưa cập nhật")</dd>
+            <dt class="col-sm-4 bg-light p-3">Đơn giá</dt>
+            <dd class="col-sm-8 p-3 mb-0 fw-bold text-success">@Model.DonGia.ToString("N0") đ</dd>
+            <dt class="col-sm-4 bg-light p-3">Số lượng tồn</dt>
+            <dd class="col-sm-8 p-3 mb-0">@Model.SoLuongTon</dd>
+            <dt class="col-sm-4 bg-light p-3">Bảo hành</dt>
+            <dd class="col-sm-8 p-3 mb-0">@Model.ThoiGianBaoHanh tháng</dd>
+            <dt class="col-sm-4 bg-light p-3">Trạng thái</dt>
+            <dd class="col-sm-8 p-3 mb-0">@Model.TrangThai</dd>
+            <dt class="col-sm-4 bg-light p-3">Mô tả</dt>
+            <dd class="col-sm-8 p-3 mb-0 text-break">@(Model.MoTa ?? "Chưa có mô tả")</dd>
+        </dl>
+
+        @if (isAdmin)
+        {
+            <div class="d-flex justify-content-end gap-2 mt-3">
+                <a asp-action="Edit" asp-route-id="@Model.MaSanPham" class="btn btn-outline-primary">Sửa sản phẩm</a>
+                <a asp-action="Delete" asp-route-id="@Model.MaSanPham" class="btn btn-outline-danger">Xóa sản phẩm</a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,19 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.SanPham
+@{
+    ViewData["Title"] = "Xóa sản phẩm";
+}
+
+<div class="row justify-content-center py-5">
+    <div class="col-12 col-lg-7">
+        <div class="border rounded p-4">
+            <div class="text-uppercase small fw-bold text-danger mb-2">Xác nhận xóa</div>
+            <h1 class="h3">Xóa sản phẩm này?</h1>
+            <p class="text-secondary">@Model.TenSanPham · @Model.ThuongHieu · @(Model.LoaiSanPham?.TenLoai ?? "Chưa phân loại")</p>
+            <p class="mb-4">Thao tác này sẽ xóa sản phẩm khỏi danh sách và không thể hoàn tác.</p>
+            <form asp-action="Delete" asp-route-id="@Model.MaSanPham" method="post" class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-light">Hủy</a>
+                <button type="submit" class="btn btn-danger">Xóa sản phẩm</button>
+            </form>
+        </div>
+    </div>
+</div>

@@ -19,9 +19,11 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models
         [Required(ErrorMessage = "Họ tên không được trống.")]
         public string HoTen { get; set; } = string.Empty;
 
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "Email bắt buộc nhập."), EmailAddress(ErrorMessage = "Email không hợp lệ.")]
         public string Email { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Vai trò bắt buộc xác định.")]
+        [RegularExpression("^(Admin|KhachHang)$", ErrorMessage = "Vai trò tài khoản không hợp lệ.")]
         public string VaiTro { get; set; } = "KhachHang"; // Admin | KhachHang
         public bool TrangThai { get; set; } = true;
 

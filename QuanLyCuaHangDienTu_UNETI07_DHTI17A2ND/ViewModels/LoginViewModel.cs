@@ -5,6 +5,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels
     public class LoginViewModel
     {
         [Required(ErrorMessage = "Vui lòng nhập tên đăng nhập.")]
+        [StringLength(50, ErrorMessage = "Tên đăng nhập không vượt quá 50 ký tự.")]
         [Display(Name = "Tên đăng nhập")]
         public string TenDangNhap { get; set; } = string.Empty;
 
@@ -17,11 +18,13 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels
     public class RegisterViewModel
     {
         [Required(ErrorMessage = "Vui lòng nhập tên đăng nhập.")]
+        [StringLength(50, ErrorMessage = "Tên đăng nhập không vượt quá 50 ký tự.")]
         [Display(Name = "Tên đăng nhập")]
         public string TenDangNhap { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
         [MinLength(6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự.")]
+        [StringLength(100, ErrorMessage = "Mật khẩu không vượt quá 100 ký tự.")]
         [DataType(DataType.Password)]
         [Display(Name = "Mật khẩu")]
         public string MatKhau { get; set; } = string.Empty;
