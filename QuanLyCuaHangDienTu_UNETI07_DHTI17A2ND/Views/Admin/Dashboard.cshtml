@@ -1,0 +1,67 @@
+﻿@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_Layout"; // Hoặc layout quản trị của nhóm bạn nếu có
+}
+
+<!--
+  Họ và tên: Vũ Thành Đạt
+  Mã sinh viên: 23203100069
+  Nội dung: Giao diện Dashboard Quản trị hệ thống
+-->
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Bảng điều khiển Quản trị (Dashboard)</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Chào mừng quản trị viên Vũ Thành Đạt (23203100069)</li>
+    </ol>
+
+    <div class="row">
+        <!-- Tổng sản phẩm -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">Tổng sản phẩm: @Model.TongSanPham</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="SanPham" asp-action="Index">Chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <!-- Tổng khách hàng -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">Tổng khách hàng: @Model.TongKhachHang</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="KhachHang" asp-action="Index">Chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <!-- Tổng đơn hàng -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">Tổng đơn hàng: @Model.TongDonHang</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="DonHang" asp-action="Index">Chi tiết</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <!-- Đơn chờ xác nhận -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4">
+                <div class="card-body">Chờ xác nhận: @Model.DonHangChoXacNhan</div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" asp-controller="DonHang" asp-action="Index">Xử lý ngay</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <a asp-action="ThongKe" class="btn btn-info btn-lg">Xem Báo cáo Thống kê Doanh thu chi tiết &rarr;</a>
+        </div>
+    </div>
+</div>
