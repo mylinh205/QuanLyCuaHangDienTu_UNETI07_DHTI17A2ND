@@ -1,0 +1,91 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.KhachHang
+
+@{
+    ViewData["Title"] = "Chi tiết khách hàng";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Chi tiết khách hàng</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            Thông tin khách hàng
+        </div>
+
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tr>
+                    <th style="width:30%">Mã khách hàng</th>
+                    <td>@Model.MaKhachHang</td>
+                </tr>
+
+                <tr>
+                    <th>Mã tài khoản</th>
+                    <td>@Model.MaTaiKhoan</td>
+                </tr>
+
+                <tr>
+                    <th>Họ tên</th>
+                    <td>@Model.HoTen</td>
+                </tr>
+
+                <tr>
+                    <th>Ngày sinh</th>
+                    <td>
+                        @(Model.NgaySinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Giới tính</th>
+                    <td>@Model.GioiTinh</td>
+                </tr>
+
+                <tr>
+                    <th>Số điện thoại</th>
+                    <td>@Model.SoDienThoai</td>
+                </tr>
+
+                <tr>
+                    <th>Email</th>
+                    <td>@Model.Email</td>
+                </tr>
+
+                <tr>
+                    <th>Địa chỉ</th>
+                    <td>@Model.DiaChi</td>
+                </tr>
+
+                <tr>
+                    <th>Ngày đăng ký</th>
+                    <td>
+                        @Model.NgayDangKy.ToString("dd/MM/yyyy HH:mm")
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Trạng thái</th>
+                    <td>
+                        @if (Model.TrangThai)
+                        {
+                            <span class="badge bg-success">
+                                Hoạt động
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">
+                                Đã khóa
+                            </span>
+                        }
+                    </td>
+                </tr>
+            </table>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</div>

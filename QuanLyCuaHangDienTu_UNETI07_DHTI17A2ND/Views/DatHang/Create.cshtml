@@ -1,0 +1,160 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.DatHangVm
+@using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Đặt hàng";
+    var sp = ViewBag.SanPham as SanPham;
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Đặt hàng sản phẩm</h2>
+
+    @if (sp == null)
+    {
+        <div class="alert alert-danger">
+            Không tìm thấy sản phẩm.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        Thông tin sản phẩm
+                    </div>
+
+                    <div class="card-body">
+                        <h4>@sp.TenSanPham</h4>
+
+                        <p>
+                            <strong>Mã sản phẩm:</strong>
+                            @sp.MaSanPham
+                        </p>
+
+                        <p>
+                            <strong>Đơn giá:</strong>
+                            <span class="text-danger fw-bold">
+                                @sp.DonGia.ToString("N0") VNĐ
+                            </span>
+                        </p>
+
+                        <p>
+                            <strong>Tồn kho:</strong>
+                            @sp.SoLuongTon
+                        </p>
+
+                        <p>
+                            <strong>Trạng thái:</strong>
+                            @sp.TrangThai
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        Thông tin đặt hàng
+                    </div>
+
+                    <div class="card-body">
+                        <form asp-action="Create"
+                              method="post">
+                            @Html.AntiForgeryToken()
+
+                            <input asp-for="MaSanPham"
+                                   type="hidden" />
+
+                            <div asp-validation-summary="ModelOnly"
+                                 class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="SoLuong"
+                                       class="form-label">
+                                    Số lượng
+                                </label>
+
+                                <input asp-for="SoLuong"
+                                       id="soLuong"
+                                       type="number"
+                                       min="1"
+                                       max="@sp.SoLuongTon"
+                                       class="form-control" />
+
+                                <span asp-validation-for="SoLuong"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="DiaChiGiaoHang"
+                                       class="form-label">
+                                    Địa chỉ giao hàng
+                                </label>
+
+                                <textarea asp-for="DiaChiGiaoHang"
+                                          rows="3"
+                                          class="form-control"></textarea>
+
+                                <span asp-validation-for="DiaChiGiaoHang"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong>Tổng tiền dự kiến:</strong>
+
+                                <h4 id="tongTien"
+                                    class="text-danger">
+                                    @((sp.DonGia * Model.SoLuong).ToString("N0")) VNĐ
+                                </h4>
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Xác nhận đặt hàng
+                            </button>
+
+                            <a asp-controller="SanPham"
+                               asp-action="Index"
+                               class="btn btn-secondary">
+                                Quay lại
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    @if (sp != null)
+    {
+        <script>
+            const donGia = @sp.DonGia.ToString(CultureInfo.InvariantCulture);
+
+            const soLuongInput =
+                document.getElementById("soLuong");
+
+            const tongTienElement =
+                document.getElementById("tongTien");
+
+            function capNhatTongTien() {
+                const soLuong =
+                    Number(soLuongInput.value) || 0;
+
+                const tongTien = donGia * soLuong;
+
+                tongTienElement.textContent =
+                    new Intl.NumberFormat("vi-VN")
+                        .format(tongTien) + " VNĐ";
+            }
+
+            soLuongInput.addEventListener(
+                "input", capNhatTongTien);
+        </script>
+    }
+}

@@ -1,0 +1,55 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.SanPham
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <label asp-for="TenSanPham" class="form-label"></label>
+        <input asp-for="TenSanPham" class="form-control" autocomplete="off" />
+        <span asp-validation-for="TenSanPham" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="MaLoai" class="form-label"></label>
+        <select asp-for="MaLoai" asp-items="ViewBag.MaLoai" class="form-select">
+            <option value="">-- Chọn loại sản phẩm --</option>
+        </select>
+        <span asp-validation-for="MaLoai" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="ThuongHieu" class="form-label"></label>
+        <input asp-for="ThuongHieu" class="form-control" />
+        <span asp-validation-for="ThuongHieu" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="XuatXu" class="form-label"></label>
+        <input asp-for="XuatXu" class="form-control" />
+        <span asp-validation-for="XuatXu" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="DonGia" class="form-label"></label>
+        <input asp-for="DonGia" type="number" min="0.01" step="0.01" class="form-control" />
+        <span asp-validation-for="DonGia" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="SoLuongTon" class="form-label"></label>
+        <input asp-for="SoLuongTon" type="number" min="0" step="1" class="form-control" />
+        <span asp-validation-for="SoLuongTon" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="ThoiGianBaoHanh" class="form-label"></label>
+        <input asp-for="ThoiGianBaoHanh" type="number" min="0" max="120" step="1" class="form-control" />
+        <span asp-validation-for="ThoiGianBaoHanh" class="text-danger"></span>
+    </div>
+    <div class="col-md-5">
+        <label asp-for="TrangThai" class="form-label"></label>
+        <select asp-for="TrangThai" class="form-select">
+            <option value="Đang kinh doanh">Đang kinh doanh</option>
+            <option value="Tạm ngừng">Tạm ngừng</option>
+            <option value="Ngừng kinh doanh">Ngừng kinh doanh</option>
+        </select>
+        <span asp-validation-for="TrangThai" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="MoTa" class="form-label"></label>
+        <textarea asp-for="MoTa" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="MoTa" class="text-danger"></span>
+    </div>
+</div>

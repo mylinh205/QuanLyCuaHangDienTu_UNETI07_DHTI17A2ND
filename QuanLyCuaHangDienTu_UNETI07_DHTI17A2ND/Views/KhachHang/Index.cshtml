@@ -1,0 +1,116 @@
+@model IEnumerable<QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.KhachHang>
+
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Quản lý khách hàng</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form asp-action="Index" method="get"
+          class="row g-2 mb-4">
+        <div class="col-md-8">
+            <input type="text"
+                   name="q"
+                   value="@ViewBag.Q"
+                   class="form-control"
+                   placeholder="Tìm theo tên, email hoặc số điện thoại..." />
+        </div>
+
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">
+                Tìm kiếm
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+                Làm mới
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Họ tên</th>
+                    <th>Số điện thoại</th>
+                    <th>Email</th>
+                    <th>Ngày đăng ký</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            Không tìm thấy khách hàng.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.MaKhachHang</td>
+                            <td>@item.HoTen</td>
+                            <td>@item.SoDienThoai</td>
+                            <td>@item.Email</td>
+                            <td>
+                                @item.NgayDangKy.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @if (item.TrangThai)
+                                {
+                                    <span class="badge bg-success">
+                                        Hoạt động
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        Đã khóa
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <a asp-action="Details"
+                                   asp-route-id="@item.MaKhachHang"
+                                   class="btn btn-info btn-sm">
+                                    Chi tiết
+                                </a>
+
+                                <form asp-action="ChangeStatus"
+                                      asp-route-id="@item.MaKhachHang"
+                                      method="post"
+                                      class="d-inline">
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="btn btn-warning btn-sm"
+                                            onclick="return confirm('Xác nhận thay đổi trạng thái khách hàng?')">
+                                        @(item.TrangThai ? "Khóa" : "Mở khóa")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

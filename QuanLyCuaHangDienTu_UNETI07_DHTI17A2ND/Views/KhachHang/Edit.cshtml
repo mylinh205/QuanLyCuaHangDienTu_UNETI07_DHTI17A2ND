@@ -1,0 +1,120 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.KhachHangEditVm
+
+@{
+    ViewData["Title"] = "Cập nhật thông tin";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Cập nhật thông tin cá nhân</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="HoTen"
+                           class="form-label">
+                        Họ và tên
+                    </label>
+
+                    <input asp-for="HoTen"
+                           class="form-control" />
+
+                    <span asp-validation-for="HoTen"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NgaySinh"
+                           class="form-label">
+                        Ngày sinh
+                    </label>
+
+                    <input asp-for="NgaySinh"
+                           type="date"
+                           class="form-control" />
+
+                    <span asp-validation-for="NgaySinh"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="GioiTinh"
+                           class="form-label">
+                        Giới tính
+                    </label>
+
+                    <select asp-for="GioiTinh"
+                            class="form-select">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+
+                    <span asp-validation-for="GioiTinh"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SoDienThoai"
+                           class="form-label">
+                        Số điện thoại
+                    </label>
+
+                    <input asp-for="SoDienThoai"
+                           class="form-control" />
+
+                    <span asp-validation-for="SoDienThoai"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email"
+                           class="form-label">
+                        Email
+                    </label>
+
+                    <input asp-for="Email"
+                           type="email"
+                           class="form-control" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DiaChi"
+                           class="form-label">
+                        Địa chỉ
+                    </label>
+
+                    <textarea asp-for="DiaChi"
+                              rows="3"
+                              class="form-control"></textarea>
+
+                    <span asp-validation-for="DiaChi"
+                          class="text-danger"></span>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-success">
+                    Lưu thay đổi
+                </button>
+
+                <a asp-action="Profile"
+                   class="btn btn-secondary">
+                    Hủy
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

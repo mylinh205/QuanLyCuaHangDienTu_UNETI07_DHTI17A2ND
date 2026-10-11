@@ -1,0 +1,81 @@
+@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.KhachHang
+
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Thông tin cá nhân</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            Hồ sơ khách hàng
+        </div>
+
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tr>
+                    <th style="width:30%">Mã khách hàng</th>
+                    <td>@Model.MaKhachHang</td>
+                </tr>
+
+                <tr>
+                    <th>Họ và tên</th>
+                    <td>@Model.HoTen</td>
+                </tr>
+
+                <tr>
+                    <th>Ngày sinh</th>
+                    <td>
+                        @(Model.NgaySinh?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Giới tính</th>
+                    <td>@Model.GioiTinh</td>
+                </tr>
+
+                <tr>
+                    <th>Số điện thoại</th>
+                    <td>@Model.SoDienThoai</td>
+                </tr>
+
+                <tr>
+                    <th>Email</th>
+                    <td>@Model.Email</td>
+                </tr>
+
+                <tr>
+                    <th>Địa chỉ</th>
+                    <td>@Model.DiaChi</td>
+                </tr>
+
+                <tr>
+                    <th>Ngày đăng ký</th>
+                    <td>
+                        @Model.NgayDangKy.ToString("dd/MM/yyyy")
+                    </td>
+                </tr>
+            </table>
+
+            <a asp-action="Edit"
+               class="btn btn-primary">
+                Cập nhật thông tin
+            </a>
+
+            <a asp-controller="DatHang"
+               asp-action="Index"
+               class="btn btn-success">
+                Đơn hàng của tôi
+            </a>
+        </div>
+    </div>
+</div>
