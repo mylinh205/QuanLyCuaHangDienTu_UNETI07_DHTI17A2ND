@@ -1,19 +1,215 @@
-﻿@{
+@model List<QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.SanPham>
+@{
     ViewData["Title"] = "Trang chủ";
     Layout = "_Layout";
 }
 
-<div class="p-5 mb-4 bg-dark text-white rounded-4 shadow-sm position-relative overflow-hidden">
-    <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold text-info">Thế Giới Điện Tử UNETI</h1>
-        <p class="col-md-8 fs-4 text-light">Cung cấp các dòng sản phẩm công nghệ, laptop, điện thoại, máy tính bảng chính hãng, cấu hình mạnh mẽ với mức giá tốt nhất thị trường.</p>
-        <a asp-controller="SanPham" asp-action="Index" class="btn btn-info btn-lg text-dark fw-bold mt-2">
-            <i class="bi bi-bag-check"></i> Khám phá sản phẩm ngay
-        </a>
+<div class="home-page">
+    <section class="container-fluid px-4 py-3">
+        <div class="hero-banner">
+            <div class="hero-content">
+                <span class="hero-badge">Ưu đãi trong hôm nay</span>
+                <h1>Hi-tech cho mọi nhịp sống</h1>
+                <p>
+                    Laptop, điện thoại, máy tính bảng và phụ kiện công nghệ với mức giá cạnh tranh,
+                    chính sách bảo hành rõ ràng và dịch vụ hỗ trợ tận tâm.
+                </p>
+                <div class="hero-actions">
+                    <a asp-controller="SanPham" asp-action="Index" class="btn btn-primary btn-lg hero-primary">
+                        <i class="bi bi-bag-check"></i> Mua ngay
+                    </a>
+                    <a href="#danh-muc" class="btn btn-light btn-lg hero-secondary">
+                        <i class="bi bi-grid-3x3-gap"></i> Khám phá
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div>
+                        <strong>14.000+</strong>
+                        <span>Sản phẩm</span>
+                    </div>
+                    <div>
+                        <strong>4.9/5</strong>
+                        <span>Đánh giá</span>
+                    </div>
+                    <div>
+                        <strong>24/7</strong>
+                        <span>Hỗ trợ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="floating-card card-one">
+                    <span>iPhone 15 Pro</span>
+                    <strong>Giảm 2.5 triệu</strong>
+                </div>
+                <div class="device-showcase">
+                    <div class="device-glow"></div>
+                    <div class="device-screen">
+                        <div class="screen-badge">New</div>
+                        <div class="screen-label">Laptop AI</div>
+                        <div class="screen-price">26.990.000đ</div>
+                    </div>
+                </div>
+                <div class="floating-card card-two">
+                    <span>FreeShip</span>
+                    <strong>Toàn quốc</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container py-3">
+        <div class="promo-strip">
+            <div class="promo-item">
+                <i class="bi bi-truck"></i>
+                <div>
+                    <strong>Giao hàng nhanh</strong>
+                    <span>Chuyển phát trong 24h</span>
+                </div>
+            </div>
+            <div class="promo-item">
+                <i class="bi bi-shield-check"></i>
+                <div>
+                    <strong>Bảo hành uy tín</strong>
+                    <span>Hỗ trợ 1 đổi 1</span>
+                </div>
+            </div>
+            <div class="promo-item">
+                <i class="bi bi-credit-card"></i>
+                <div>
+                    <strong>Thanh toán linh hoạt</strong>
+                    <span>COD, VNPay, thẻ</span>
+                </div>
+            </div>
+        </div>
+
+        <section id="danh-muc" class="category-section">
+            <div class="section-header">
+                <div>
+                    <span class="section-kicker">Danh mục</span>
+                    <h2>Khám phá theo nhu cầu</h2>
+                </div>
+                <a asp-controller="SanPham" asp-action="Index">Xem tất cả</a>
+            </div>
+
+            <div class="category-grid">
+                <div class="category-card">
+                    <i class="bi bi-phone"></i>
+                    <span>Điện thoại</span>
+                </div>
+                <div class="category-card">
+                    <i class="bi bi-laptop"></i>
+                    <span>Laptop</span>
+                </div>
+                <div class="category-card">
+                    <i class="bi bi-tablet-landscape"></i>
+                    <span>Tablet</span>
+                </div>
+                <div class="category-card">
+                    <i class="bi bi-speaker"></i>
+                    <span>Âm thanh</span>
+                </div>
+                <div class="category-card">
+                    <i class="bi bi-watch"></i>
+                    <span>Đồng hồ</span>
+                </div>
+                <div class="category-card">
+                    <i class="bi bi-headset"></i>
+                    <span>Phụ kiện</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="deal-section">
+            <div class="section-header">
+                <div>
+                    <span class="section-kicker">Flash sale</span>
+                    <h2>Sản phẩm nổi bật</h2>
+                </div>
+                <a asp-controller="SanPham" asp-action="Index">Xem thêm</a>
+            </div>
+
+            <div class="product-grid">
+                @if (Model != null && Model.Count > 0)
+                {
+                    @foreach (var product in Model)
+                    {
+                        var discount = 8 + (product.MaSanPham % 12);
+                        var imageUrl = product.HinhAnh;
+                        if (string.IsNullOrWhiteSpace(imageUrl))
+                        {
+                            var imageSearchTerms = Uri.EscapeDataString($"{product.ThuongHieu} {product.TenSanPham}");
+                            imageUrl = $"https://tse1.mm.bing.net/th?q={imageSearchTerms}";
+                        }
+                        <article class="product-card">
+                            <span class="product-badge">-@discount%</span>
+                            <img src="@imageUrl"
+                                 alt="@product.TenSanPham"
+                                 class="product-image" />
+                            <h3>@product.TenSanPham</h3>
+                            <div class="rating"><span>★★★★★</span> 4.9</div>
+                            <div class="price-box">
+                                <strong>@product.DonGia.ToString("N0")đ</strong>
+                                <small>@((product.DonGia * 1.18m).ToString("N0"))đ</small>
+                            </div>
+                            <a asp-controller="DatHang" asp-action="Create" asp-route-maSanPham="@product.MaSanPham" class="btn btn-primary w-100">Đặt hàng</a>
+                        </article>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-info w-100">Hiện chưa có sản phẩm nào trong cơ sở dữ liệu.</div>
+                }
+            </div>
+        </section>
+
+        <section class="feature-banner">
+            <div class="feature-copy">
+                <span class="section-kicker">Dịch vụ tốt nhất</span>
+                <h2>Đặt hàng dễ dàng, nhận hàng nhanh, an tâm tuyệt đối.</h2>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i> Bảo hành chính hãng trên toàn quốc</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i> Tư vấn kỹ thuật bằng đội ngũ chuyên gia</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i> Tích điểm, ưu đãi hấp dẫn theo từng đơn hàng</li>
+                </ul>
+            </div>
+            <div class="feature-visual">
+                <div class="mini-card mini-top">Miễn phí lắp đặt</div>
+                <div class="mini-card mini-bottom">Hỗ trợ 24/7</div>
+            </div>
+        </section>
+
+        <section class="trust-section">
+            <div class="section-header compact">
+                <div>
+                    <span class="section-kicker">Đối tác tin cậy</span>
+                    <h2>Vì sao khách hàng chọn UNETI</h2>
+                </div>
+            </div>
+
+            <div class="trust-grid">
+                <div class="trust-card">
+                    <i class="bi bi-award"></i>
+                    <h3>Chất lượng</h3>
+                    <p>Sản phẩm chính hãng, nguồn gốc rõ ràng và kiểm định kỹ lưỡng.</p>
+                </div>
+                <div class="trust-card">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <h3>Đổi trả</h3>
+                    <p>Hỗ trợ đổi trả nhanh chóng theo đúng quy định và cam kết.</p>
+                </div>
+                <div class="trust-card">
+                    <i class="bi bi-headset"></i>
+                    <h3>Hỗ trợ</h3>
+                    <p>Đội ngũ tư vấn luôn sẵn sàng hỗ trợ bạn trước và sau mua hàng.</p>
+                </div>
+            </div>
+        </section>
     </div>
 </div>
 
-<div class="row text-center g-4 my-4">
+<div class="row text-center g-4 my-4 container mx-auto">
     <div class="col-md-4">
         <div class="card p-4 h-100 shadow-sm border-0">
             <div class="card-body">

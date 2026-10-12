@@ -297,6 +297,7 @@
         </div>
     </form>
 
+<<<<<<< HEAD
     <div class="table-wrap">
         <div class="table-responsive">
             <table class="table table-hover align-middle">
@@ -371,8 +372,79 @@
                     }
                 </tbody>
             </table>
+=======
+    @if (Model.SanPhams.Count > 0)
+    {
+        <div class="catalog-grid">
+            @foreach (var product in Model.SanPhams)
+            {
+                var statusClass = product.TrangThai switch
+                {
+                    "Đang kinh doanh" => "status-active",
+                    "Tạm ngừng" => "status-paused",
+                    _ => "status-stopped"
+                };
+                var imageUrl = product.HinhAnh;
+                if (string.IsNullOrWhiteSpace(imageUrl))
+                {
+                    var imageSearchTerms = Uri.EscapeDataString($"{product.ThuongHieu} {product.TenSanPham}");
+                    imageUrl = $"https://tse1.mm.bing.net/th?q={imageSearchTerms}";
+                }
+                <article class="catalog-card">
+                    <a asp-action="Details" asp-route-id="@product.MaSanPham" class="catalog-image-link" aria-label="Xem @product.TenSanPham">
+                        <img src="@imageUrl"
+                             alt="@product.TenSanPham"
+                             class="catalog-image" />
+                        <span class="catalog-code">Mã #@product.MaSanPham</span>
+                    </a>
+                    <div class="catalog-card-body">
+                        <div class="catalog-card-meta">
+                            <span class="catalog-category">@(product.LoaiSanPham?.TenLoai ?? "Chưa phân loại")</span>
+                            <span class="status @statusClass">@product.TrangThai</span>
+                        </div>
+                        <a asp-action="Details" asp-route-id="@product.MaSanPham" class="catalog-name">@product.TenSanPham</a>
+                        <div class="catalog-brand"><i class="bi bi-patch-check"></i> @product.ThuongHieu</div>
+                        <div class="catalog-card-bottom">
+                            <div>
+                                <span class="catalog-price">@product.DonGia.ToString("N0") đ</span>
+                                <span class="catalog-stock">Còn @product.SoLuongTon sản phẩm</span>
+                            </div>
+                            <a asp-action="Details" asp-route-id="@product.MaSanPham" class="catalog-view" aria-label="Chi tiết sản phẩm">
+                                <i class="bi bi-arrow-up-right"></i>
+                            </a>
+                        </div>
+                        @if (isAdmin)
+                        {
+                            <div class="catalog-admin">
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Edit" asp-route-id="@product.MaSanPham" class="btn btn-sm btn-outline-primary flex-fill"><i class="bi bi-pencil-square"></i> Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@product.MaSanPham" class="btn btn-sm btn-outline-danger flex-fill"><i class="bi bi-trash"></i> Xóa</a>
+                                </div>
+                                <form asp-action="UpdateStatus" asp-route-id="@product.MaSanPham" method="post" class="d-flex gap-2 mt-2">
+                                    <select name="status" class="form-select form-select-sm" aria-label="Trạng thái mới">
+                                        <option value="Đang kinh doanh" selected="@(product.TrangThai == "Đang kinh doanh")">Đang kinh doanh</option>
+                                        <option value="Tạm ngừng" selected="@(product.TrangThai == "Tạm ngừng")">Tạm ngừng</option>
+                                        <option value="Ngừng kinh doanh" selected="@(product.TrangThai == "Ngừng kinh doanh")">Ngừng kinh doanh</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Cập nhật trạng thái"><i class="bi bi-check2"></i></button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                </article>
+            }
+>>>>>>> 72542d2f8da0a97de916af25f392bfcf982b2032
         </div>
-    </div>
+    }
+    else
+    {
+        <div class="catalog-empty">
+            <i class="bi bi-search"></i>
+            <h2>Chưa tìm thấy sản phẩm</h2>
+            <p>Thử thay đổi từ khóa hoặc điều kiện lọc để xem thêm sản phẩm.</p>
+            <a asp-action="Index" class="btn btn-primary">Xóa bộ lọc</a>
+        </div>
+    }
 
     <footer class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-4">
         <div class="text-muted small fw-medium">

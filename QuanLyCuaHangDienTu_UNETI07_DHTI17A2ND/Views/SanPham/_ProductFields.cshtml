@@ -23,6 +23,11 @@
         <input asp-for="XuatXu" class="form-control" />
         <span asp-validation-for="XuatXu" class="text-danger"></span>
     </div>
+    <div class="col-12">
+        <label asp-for="HinhAnh" class="form-label"></label>
+        <input asp-for="HinhAnh" class="form-control" placeholder="https://images.unsplash.com/..." />
+        <span asp-validation-for="HinhAnh" class="text-danger"></span>
+    </div>
     <div class="col-md-4">
         <label asp-for="DonGia" class="form-label"></label>
         <input asp-for="DonGia" type="number" min="0.01" step="0.01" class="form-control" />

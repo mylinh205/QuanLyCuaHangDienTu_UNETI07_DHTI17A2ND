@@ -1,51 +1,75 @@
 ﻿@model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.LoginViewModel
 @{
-    ViewData["Title"] = "Đăng nhập hệ thống";
+    ViewData["Title"] = "Đăng nhập";
 }
 
-<!-- SV Thực hiện: Đào Minh Long - MSV: 23203100068 -->
-<div class="row justify-content-center mt-5">
-    <div class="col-md-5">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white text-center">
-                <h4 class="mb-0">ĐĂNG NHẬP HỆ THỐNG</h4>
+<section class="account-page">
+    <div class="account-shell">
+        <aside class="account-aside">
+            <a asp-controller="Home" asp-action="Index" class="account-brand">
+                <span class="account-brand-icon"><i class="bi bi-cpu-fill"></i></span>
+                UNETI <span>TECH</span>
+            </a>
+            <div class="account-aside-content">
+                <span class="account-kicker">Chào mừng trở lại</span>
+                <h1>Công nghệ tốt, trải nghiệm tốt hơn.</h1>
+                <p>Đăng nhập để theo dõi đơn hàng, lưu thông tin và nhận các ưu đãi dành riêng cho bạn.</p>
+                <div class="account-benefit">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Mua sắm an tâm với sản phẩm chính hãng</span>
+                </div>
+                <div class="account-benefit">
+                    <i class="bi bi-lightning-charge"></i>
+                    <span>Cập nhật nhanh tình trạng đơn hàng</span>
+                </div>
             </div>
-            <div class="card-body">
-                @if (ViewBag.Error != null)
-                {
-                    <div class="alert alert-danger" role="alert">
-                        @ViewBag.Error
-                    </div>
-                }
+            <div class="account-aside-footer">Thế Giới Điện Tử UNETI</div>
+        </aside>
 
-                <form asp-action="Login" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <div class="mb-3">
-                        <label asp-for="TenDangNhap" class="form-label">Tên đăng nhập</label>
-                        <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập..." />
-                        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="MatKhau" class="form-label">Mật khẩu</label>
-                        <input asp-for="MatKhau" type="password" class="form-control" placeholder="Nhập mật khẩu..." />
-                        <span asp-validation-for="MatKhau" class="text-danger"></span>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 py-2 mt-2">Đăng nhập</button>
-                </form>
+        <div class="account-form-panel">
+            <div class="account-form-heading">
+                <span class="account-form-icon"><i class="bi bi-person-check"></i></span>
+                <span class="account-kicker">Tài khoản UNETI</span>
+                <h2>Đăng nhập</h2>
+                <p>Nhập thông tin tài khoản để tiếp tục.</p>
             </div>
-            <div class="card-footer text-center py-3">
-                <span>Chưa có tài khoản? </span>
-                <a asp-controller="Account" asp-action="Register" class="text-primary fw-bold text-decoration-none">Đăng ký ngay</a>
+
+            @if (TempData["Success"] is string success)
+            {
+                <div class="alert alert-success" role="status">@success</div>
+            }
+            <form asp-action="Login" method="post" class="account-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger account-validation"></div>
+                <div class="account-field">
+                    <label asp-for="TenDangNhap" class="form-label"></label>
+                    <div class="account-input-wrap">
+                        <i class="bi bi-person"></i>
+                        <input asp-for="TenDangNhap" class="form-control" placeholder="Tên đăng nhập" autocomplete="username" />
+                    </div>
+                    <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                </div>
+                <div class="account-field">
+                    <label asp-for="MatKhau" class="form-label"></label>
+                    <div class="account-input-wrap">
+                        <i class="bi bi-lock"></i>
+                        <input asp-for="MatKhau" type="password" class="form-control" placeholder="Mật khẩu" autocomplete="current-password" />
+                    </div>
+                    <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn account-submit">
+                    Đăng nhập <i class="bi bi-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="account-switch">
+                Chưa có tài khoản?
+                <a asp-controller="Account" asp-action="Register">Đăng ký ngay</a>
             </div>
+            <a asp-controller="Home" asp-action="Index" class="account-back"><i class="bi bi-arrow-left"></i> Quay về trang chủ</a>
         </div>
     </div>
-</div>
+</section>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

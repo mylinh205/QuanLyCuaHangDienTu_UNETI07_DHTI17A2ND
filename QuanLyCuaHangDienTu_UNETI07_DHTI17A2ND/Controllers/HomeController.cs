@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data;
 using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models;
 using System.Diagnostics;
 
@@ -6,9 +8,22 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly ApplicationDbContext _context;
+
+        public HomeController(ApplicationDbContext context)
         {
-            return View();
+            _context = context;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var featuredProducts = await _context.SanPhams
+                .Where(p => p.TrangThai == "Đang kinh doanh")
+                .OrderByDescending(p => p.DonGia)
+                .Take(4)
+                .ToListAsync();
+
+            return View(featuredProducts);
         }
 
         public IActionResult Privacy()

@@ -144,28 +144,40 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
         }
 
         // ================= 3. THỐNG KÊ DỮ LIỆU & BÁO CÁO LINQ =================
+        // ================= 3. THỐNG KÊ DỮ LIỆU & BÁO CÁO LINQ =================
         public async Task<IActionResult> ThongKe()
         {
             if (!CheckAdmin()) return RedirectToAction("Login", "Account");
 
-            // 1. Thống kê số lượng sản phẩm theo từng loại (GROUP BY)
-            ViewBag.SanPhamTheoLoai = await _context.SanPhams
+            var viewModel = new ThongKeViewModel();
+
+            // 1. Thống kê số lượng sản phẩm theo từng loại (GROUP BY, Count)
+            viewModel.SanPhamTheoLoai = await _context.SanPhams
                 .GroupBy(s => s.LoaiSanPham!.TenLoai)
-                .Select(g => new { TenLoai = g.Key, SoLuong = g.Count() })
+                .Select(g => new SanPhamTheoLoaiDto
+                {
+                    TenLoai = g.Key ?? "Chưa phân loại",
+                    SoLuongSanPham = g.Count()
+                })
                 .ToListAsync();
 
-            // 2. Thống kê đơn hàng theo trạng thái
-            ViewBag.DonHangTheoTrangThai = await _context.DonHangs
+            // 2. Thống kê đơn hàng theo trạng thái (GROUP BY, Count)
+            viewModel.DonHangTheoTrangThai = await _context.DonHangs
                 .GroupBy(d => d.TrangThai)
-                .Select(g => new { TrangThai = g.Key, SoLuong = g.Count() })
+                .Select(g => new DonHangTheoTrangThaiDto
+                {
+                    TrangThai = g.Key ?? "Không xác định",
+                    SoLuongDon = g.Count()
+                })
                 .ToListAsync();
 
-            // 3. Thống kê sản phẩm bán chạy nhất (Chỉ tính đơn đã hoàn thành)
-            ViewBag.SanPhamBanChay = await _context.ChiTietDonHangs
+            // 3. Thống kê Top 5 sản phẩm bán chạy nhất (Chỉ tính đơn "Đã hoàn thành")
+            viewModel.SanPhamBanChay = await _context.ChiTietDonHangs
                 .Where(c => c.DonHang!.TrangThai == "Đã hoàn thành")
                 .GroupBy(c => c.SanPham!.TenSanPham)
-                .Select(g => new {
-                    TenSanPham = g.Key,
+                .Select(g => new SanPhamBanChayDto
+                {
+                    TenSanPham = g.Key ?? "Không rõ",
                     TongSoLuongBan = g.Sum(c => c.SoLuong),
                     TongDoanhThu = g.Sum(c => c.ThanhTien)
                 })
@@ -173,27 +185,30 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
                 .Take(5)
                 .ToListAsync();
 
-            // 4. Thống kê doanh thu theo tháng
-            var thongKeThangRaw = await _context.DonHangs
+            // 4. Thống kê doanh thu theo tháng (Chỉ tính đơn "Đã hoàn thành")
+            var rawDoanhThu = await _context.DonHangs
                 .Where(d => d.TrangThai == "Đã hoàn thành")
                 .GroupBy(d => new { d.NgayDat.Year, d.NgayDat.Month })
                 .Select(g => new {
                     Year = g.Key.Year,
                     Month = g.Key.Month,
-                    TongDoanhThu = g.Sum(d => d.TongTien)
+                    DoanhThu = g.Sum(d => d.TongTien)
                 })
                 .OrderBy(g => g.Year)
                 .ThenBy(g => g.Month)
                 .ToListAsync();
 
-            ViewBag.DoanhThuTheoThang = thongKeThangRaw
-                .Select(g => new {
-                    ThangNam = $"{g.Month:D2}/{g.Year}",
-                    TongDoanhThu = g.TongDoanhThu
-                })
-                .ToList();
+            viewModel.DoanhThuTheoThang = rawDoanhThu.Select(x => new DoanhThuThangDto
+            {
+                ThangNam = $"{x.Month:D2}/{x.Year}",
+                DoanhThu = x.DoanhThu
+            }).ToList();
 
-            return View();
+            // Tính tổng doanh thu toàn hệ thống từ các đơn hoàn thành
+            viewModel.TongDoanhThuTatCa = viewModel.DoanhThuTheoThang.Sum(x => x.DoanhThu);
+            viewModel.TongSoLuongDaBan = viewModel.SanPhamBanChay.Sum(x => x.TongSoLuongBan);
+
+            return View(viewModel);
         }
     }
 }

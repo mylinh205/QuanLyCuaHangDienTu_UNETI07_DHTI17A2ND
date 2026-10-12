@@ -14,6 +14,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
             // Chỉ dùng EnsureCreated khi dự án không sử dụng Migrations.
             // Nếu database đã tồn tại, lệnh này không cập nhật cấu trúc bảng.
             context.Database.EnsureCreated();
+            context.Database.ExecuteSqlRaw("IF COL_LENGTH('SanPhams', 'HinhAnh') IS NULL ALTER TABLE SanPhams ADD HinhAnh NVARCHAR(500) NULL;");
 
             // =====================================
             // 1. TẠO TÀI KHOẢN ADMIN
@@ -273,7 +274,11 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                             SoLuongTon = 5 + (productIndex * 7 % 36),
                             ThoiGianBaoHanh = group.WarrantyMonths,
                             MoTa = $"{group.Category} {group.Brand} chính hãng, bảo hành {group.WarrantyMonths} tháng.",
-                            TrangThai = status
+
+
+
+                            TrangThai = status,
+                            HinhAnh = GetProductImageUrl(group.Brand, group.Names[i])
                         };
 
                         products.Add(product);
@@ -284,6 +289,17 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                 context.SanPhams.AddRange(products);
                 context.SaveChanges();
             }
+
+            var seededImageQuery = "?auto=format&fit=crop&w=1000&q=80";
+            var productsWithCategoryImages = context.SanPhams
+                .Where(product => product.HinhAnh == null || product.HinhAnh.Contains(seededImageQuery))
+                .ToList();
+
+            foreach (var product in productsWithCategoryImages)
+                product.HinhAnh = GetProductImageUrl(product.ThuongHieu, product.TenSanPham);
+
+            if (productsWithCategoryImages.Count > 0)
+                context.SaveChanges();
 
             // =====================================
             // 5. TẠO KHÁCH HÀNG & ĐƠN HÀNG MẪU (Cho phần Thống kê / Sinh viên 4)
@@ -382,6 +398,13 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                     context.SaveChanges();
                 }
             }
+
+        }
+
+        private static string GetProductImageUrl(string brand, string productName)
+        {
+            var searchTerms = Uri.EscapeDataString($"{brand} {productName}");
+            return $"https://tse1.mm.bing.net/th?q={searchTerms}";
         }
 
         // =====================================
