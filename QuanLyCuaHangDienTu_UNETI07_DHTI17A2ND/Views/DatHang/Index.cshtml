@@ -1,32 +1,35 @@
-@model IEnumerable<QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.DonHang>
+﻿@model IEnumerable<QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.DonHang>
 
 @{
     ViewData["Title"] = "Đơn hàng của tôi";
     string? trangThai = ViewBag.TrangThai as string;
 }
 
-<div class="container mt-4">
-    <h2 class="mb-4">Đơn hàng của tôi</h2>
+<section class="order-page">
+    <header class="order-heading">
+        <div>
+            <span class="order-kicker">Tài khoản của bạn</span>
+            <h1>Đơn hàng của tôi</h1>
+            <p>Theo dõi trạng thái và xem lại thông tin các đơn hàng đã đặt.</p>
+        </div>
+        <a asp-controller="SanPham" asp-action="Index" class="btn order-shop-button">
+            <i class="bi bi-bag"></i> Tiếp tục mua sắm
+        </a>
+    </header>
 
     @if (TempData["Success"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["Success"]
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     }
 
-    <form asp-action="Index"
-          method="get"
-          class="row g-2 mb-4">
-
-        <div class="col-md-5">
-            <select name="trangThai"
-                    class="form-select">
-
-                <option value="">
-                    Tất cả trạng thái
-                </option>
-
+    <form asp-action="Index" method="get" class="order-filter">
+        <label for="trangThai" class="form-label">Lọc theo trạng thái</label>
+        <div class="order-filter-controls">
+            <select id="trangThai" name="trangThai" class="form-select">
+                <option value="">Tất cả trạng thái</option>
                 @foreach (var status in new[]
                 {
                     "Chờ xác nhận",
@@ -38,104 +41,70 @@
                 {
                     if (trangThai == status)
                     {
-                        <option value="@status" selected>
-                            @status
-                        </option>
+                        <option value="@status" selected>@status</option>
                     }
                     else
                     {
-                        <option value="@status">
-                            @status
-                        </option>
+                        <option value="@status">@status</option>
                     }
                 }
             </select>
-        </div>
-
-        <div class="col-md-auto">
-            <button type="submit"
-                    class="btn btn-primary">
-                Lọc đơn hàng
-            </button>
-        </div>
-
-        <div class="col-md-auto">
-            <a asp-action="History"
-               class="btn btn-outline-success">
-                Lịch sử mua hàng
-            </a>
+            <button type="submit" class="btn order-filter-button"><i class="bi bi-funnel"></i> Lọc đơn hàng</button>
+            <a asp-action="History" class="btn order-history-button"><i class="bi bi-clock-history"></i> Lịch sử mua hàng</a>
         </div>
     </form>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">
-            Bạn chưa có đơn hàng nào.
+        <div class="order-empty">
+            <span class="order-empty-icon"><i class="bi bi-bag"></i></span>
+            <h2>Bạn chưa có đơn hàng nào</h2>
+            <p>Hãy khám phá các sản phẩm công nghệ và đặt đơn hàng đầu tiên nhé.</p>
+            <a asp-controller="SanPham" asp-action="Index" class="btn order-filter-button">Khám phá sản phẩm</a>
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Mã đơn</th>
-                        <th>Ngày đặt</th>
-                        <th>Địa chỉ giao hàng</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.MaDonHang</td>
-
-                            <td>
-                                @item.NgayDat.ToString("dd/MM/yyyy HH:mm")
-                            </td>
-
-                            <td>@item.DiaChiGiaoHang</td>
-
-                            <td class="text-danger fw-bold">
-                                @item.TongTien.ToString("N0") VNĐ
-                            </td>
-
-                            <td>
-                                @if (item.TrangThai == "Đã hoàn thành")
-                                {
-                                    <span class="badge bg-success">
-                                        @item.TrangThai
-                                    </span>
-                                }
-                                else if (item.TrangThai == "Đã hủy")
-                                {
-                                    <span class="badge bg-danger">
-                                        @item.TrangThai
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">
-                                        @item.TrangThai
-                                    </span>
-                                }
-                            </td>
-
-                            <td>
-                                <a asp-action="Details"
-                                   asp-route-id="@item.MaDonHang"
-                                   class="btn btn-info btn-sm">
-                                    Xem chi tiết
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="order-list">
+            @foreach (var item in Model)
+            {
+                var statusClass = item.TrangThai switch
+                {
+                    "Đã hoàn thành" => "order-status-complete",
+                    "Đã hủy" => "order-status-cancelled",
+                    "Đang giao" => "order-status-shipping",
+                    _ => "order-status-pending"
+                };
+                <article class="order-card">
+                    <div class="order-card-main">
+                        <div class="order-card-title">
+                            <span class="order-icon"><i class="bi bi-receipt"></i></span>
+                            <div>
+                                <span class="order-muted">Mã đơn hàng</span>
+                                <h2>#@item.MaDonHang</h2>
+                            </div>
+                        </div>
+                        <div class="order-info">
+                            <span class="order-muted">Ngày đặt</span>
+                            <strong>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</strong>
+                        </div>
+                        <div class="order-info order-address">
+                            <span class="order-muted">Địa chỉ giao hàng</span>
+                            <strong title="@item.DiaChiGiaoHang">@item.DiaChiGiaoHang</strong>
+                        </div>
+                        <div class="order-info">
+                            <span class="order-muted">Tổng tiền</span>
+                            <strong class="order-total">@item.TongTien.ToString("N0") VNĐ</strong>
+                        </div>
+                    </div>
+                    <div class="order-card-footer">
+                        <span class="order-status @statusClass"><span></span>@item.TrangThai</span>
+                        <a asp-action="Details" asp-route-id="@item.MaDonHang" class="btn order-detail-button">
+                            Xem chi tiết <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </article>
+            }
         </div>
     }
-</div>
+</section>

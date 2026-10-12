@@ -1,3 +1,8 @@
+using Microsoft.AspNetCore.Mvc;
+using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data;
+
+using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels;
+
 // Họ và tên: Vũ Thành Đạt
 // Mã sinh viên: 23203100069
 // Nội dung thực hiện: Module 4 - Quản lý đơn hàng, Xử lý trạng thái, Dashboard và Thống kê
@@ -70,7 +75,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
             if (id == null) return NotFound();
 
             var donHang = await _context.DonHangs
-                .Include(d => d.KhachHang)
+.Include(d => d.KhachHang)
                 .Include(d => d.ChiTietDonHangs)
                     .ThenInclude(c => c.SanPham)
                 .FirstOrDefaultAsync(m => m.MaDonHang == id);
@@ -89,21 +94,49 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
 
             var donHang = await _context.DonHangs
                 .Include(d => d.ChiTietDonHangs)
+                    .ThenInclude(c => c.SanPham)
                 .FirstOrDefaultAsync(d => d.MaDonHang == maDonHang);
 
             if (donHang == null) return NotFound();
 
             string trangThaiCu = donHang.TrangThai;
 
-            // Nghiệp vụ: Nếu chuyển từ trạng thái khác sang "Đã hủy" thì hoàn lại số lượng tồn kho sản phẩm
-            if (trangThaiMoi == "Đã hủy" && trangThaiCu != "Đã hủy")
+            // 1. Nghiệp vụ: Chặn không cho chuyển ngược từ "Đã hoàn thành" về "Chờ xác nhận"
+            if (trangThaiCu == "Đã hoàn thành" && trangThaiMoi == "Chờ xác nhận")
+            {
+                TempData["Error"] = "Đơn hàng đã hoàn thành không được phép chuyển ngược về chờ xác nhận!";
+                return RedirectToAction(nameof(ChiTietDonHang), new { id = maDonHang });
+            }
+
+            // 2. Nghiệp vụ kiểm tra tồn kho & Trừ kho khi chuyển từ "Chờ xác nhận" sang "Đã xác nhận"
+            if (trangThaiCu == "Chờ xác nhận" && trangThaiMoi == "Đã xác nhận")
             {
                 foreach (var item in donHang.ChiTietDonHangs)
                 {
-                    var sp = await _context.SanPhams.FindAsync(item.MaSanPham);
-                    if (sp != null)
+                    var sp = item.SanPham;
+                    if (sp == null || sp.SoLuongTon < item.SoLuong)
                     {
-                        sp.SoLuongTon += item.SoLuong;
+                        TempData["Error"] = $"Sản phẩm '{sp?.TenSanPham ?? "Không xác định"}' không đủ số lượng tồn kho (Còn lại: {sp?.SoLuongTon ?? 0}, Cần: {item.SoLuong}). Không thể xác nhận đơn hàng!";
+                        return RedirectToAction(nameof(ChiTietDonHang), new { id = maDonHang });
+                    }
+                }
+
+                // Đủ hàng -> Tiến hành trừ số lượng tồn kho
+                foreach (var item in donHang.ChiTietDonHangs)
+                {
+                    item.SanPham.SoLuongTon -= item.SoLuong;
+                    if (item.SanPham.SoLuongTon < 0) item.SanPham.SoLuongTon = 0; // Ràng buộc SoLuongTon >= 0
+                }
+            }
+
+            // 3. Nghiệp vụ: Nếu hủy đơn mà trước đó đã trừ kho (ví dụ từ Đã xác nhận / Đang giao -> Đã hủy), hoàn lại số lượng tồn kho
+            if (trangThaiMoi == "Đã hủy" && (trangThaiCu == "Đã xác nhận" || trangThaiCu == "Đang giao"))
+            {
+                foreach (var item in donHang.ChiTietDonHangs)
+                {
+                    if (item.SanPham != null)
+                    {
+                        item.SanPham.SoLuongTon += item.SoLuong;
                     }
                 }
             }
@@ -112,7 +145,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"Đã cập nhật trạng thái đơn hàng #{maDonHang} thành '{trangThaiMoi}' thành công!";
-            return RedirectToAction(nameof(QuanLyDonHang));
+            return RedirectToAction(nameof(ChiTietDonHang), new { id = maDonHang });
         }
 
         // ================= 3. THỐNG KÊ DỮ LIỆU & BÁO CÁO LINQ =================
@@ -142,11 +175,10 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
                     TongDoanhThu = g.Sum(c => c.ThanhTien)
                 })
                 .OrderByDescending(g => g.TongSoLuongBan)
-                .Take(5) // Lấy top 5 sản phẩm bán chạy
+                .Take(5)
                 .ToListAsync();
 
             // 4. Thống kê doanh thu theo tháng
-            // 4. Thống kê doanh thu theo tháng (Đã fix lỗi sắp xếp và định dạng)
             var thongKeThangRaw = await _context.DonHangs
                 .Where(d => d.TrangThai == "Đã hoàn thành")
                 .GroupBy(d => new { d.NgayDat.Year, d.NgayDat.Month })
@@ -157,7 +189,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
                 })
                 .OrderBy(g => g.Year)
                 .ThenBy(g => g.Month)
-                .ToListAsync(); // Sắp xếp ngay tại phía Database trước khi đưa về RAM
+                .ToListAsync();
 
             ViewBag.DoanhThuTheoThang = thongKeThangRaw
                 .Select(g => new {
@@ -165,6 +197,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
                     TongDoanhThu = g.TongDoanhThu
                 })
                 .ToList();
+
             return View();
         }
     }

@@ -29,6 +29,10 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models
         [Display(Name = "Xuất xứ")]
         public string? XuatXu { get; set; }
 
+        [StringLength(500, ErrorMessage = "Đường dẫn ảnh không vượt quá 500 ký tự.")]
+        [Display(Name = "Ảnh sản phẩm")]
+        public string? HinhAnh { get; set; }
+
         [Required(ErrorMessage = "Đơn giá bắt buộc nhập.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Đơn giá phải lớn hơn 0.")]
         [Column(TypeName = "decimal(18,2)")]
