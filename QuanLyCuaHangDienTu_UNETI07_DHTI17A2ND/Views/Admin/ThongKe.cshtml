@@ -1,41 +1,26 @@
 ﻿@{
-    ViewData["Title"] = "Thống kê Báo cáo";
+    ViewData["Title"] = "Thống kê báo cáo doanh thu";
     Layout = "_Layout";
 }
 
-<!--
-  Họ và tên: Vũ Thành Đạt
-  Mã sinh viên: 23203100069
-  Nội dung: Giao diện Thống kê báo cáo doanh thu & sản phẩm bằng LINQ
--->
+<div class="container py-4">
+    <h2 class="mb-4 text-primary fw-bold"><i class="bi bi-bar-chart-line"></i> Báo cáo & Thống kê kinh doanh</h2>
 
-<div class="container mt-4">
-    <h2>Thống kê & Báo cáo doanh thu cửa hàng điện tử</h2>
-    <hr />
-
-    <div class="row">
-        <!-- Thống kê sản phẩm theo loại -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-primary text-white">Thống kê số lượng sản phẩm theo loại</div>
+    <div class="row g-4">
+        <!-- 1. Sản phẩm theo loại -->
+        <div class="col-md-6">
+            <div class="card shadow h-100">
+                <div class="card-header bg-dark text-white fw-bold">Thống kê số sản phẩm theo loại</div>
                 <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Tên loại sản phẩm</th>
-                                <th>Số lượng</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-striped">
+                        <thead><tr><th>Tên loại</th><th>Số lượng sản phẩm</th></tr></thead>
                         <tbody>
-                            @if (ViewBag.SanPhamTheoLoai != null)
+                            @foreach (var item in ViewBag.SanPhamTheoLoai)
                             {
-                                @foreach (var item in ViewBag.SanPhamTheoLoai)
-                                {
-                                    <tr>
-                                        <td>@item.TenLoai</td>
-                                        <td>@item.SoLuong</td>
-                                    </tr>
-                                }
+                                <tr>
+                                    <td>@item.TenLoai</td>
+                                    <td class="fw-bold text-primary">@item.SoLuong</td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -43,43 +28,33 @@
             </div>
         </div>
 
-        <!-- Thống kê trạng thái đơn hàng -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-success text-white">Thống kê trạng thái đơn hàng</div>
+        <!-- 2. Đơn hàng theo trạng thái -->
+        <div class="col-md-6">
+            <div class="card shadow h-100">
+                <div class="card-header bg-dark text-white fw-bold">Thống kê đơn hàng theo trạng thái</div>
                 <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Trạng thái đơn hàng</th>
-                                <th>Số lượng</th>
-                            </tr>
-                        </thead>
+                    <table class="table table-striped">
+                        <thead><tr><th>Trạng thái</th><th>Số lượng đơn</th></tr></thead>
                         <tbody>
-                            @if (ViewBag.DonHangTheoTrangThai != null)
+                            @foreach (var item in ViewBag.DonHangTheoTrangThai)
                             {
-                                @foreach (var item in ViewBag.DonHangTheoTrangThai)
-                                {
-                                    <tr>
-                                        <td>@item.TrangThai</td>
-                                        <td>@item.SoLuong</td>
-                                    </tr>
-                                }
+                                <tr>
+                                    <td><span class="badge bg-secondary">@item.TrangThai</span></td>
+                                    <td class="fw-bold text-success">@item.SoLuong</td>
+                                </tr>
                             }
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Doanh thu theo sản phẩm -->
-    <div class="row">
-        <div class="col-md-12 mb-4">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">Top sản phẩm bán chạy & Doanh thu (Đơn đã hoàn thành)</div>
+        <!-- 3. Top sản phẩm bán chạy -->
+        <div class="col-md-12 mt-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white fw-bold">Top sản phẩm bán chạy nhất (Đã hoàn thành)</div>
                 <div class="card-body">
-                    <table class="table table-striped table-bordered">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>Tên sản phẩm</th>
@@ -88,16 +63,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (ViewBag.SoLuongBanTheoSanPham != null)
+                            @foreach (var item in ViewBag.SanPhamBanChay)
                             {
-                                @foreach (var item in ViewBag.SoLuongBanTheoSanPham)
-                                {
-                                    <tr>
-                                        <td>@item.TenSanPham</td>
-                                        <td>@item.TongSoLuong</td>
-                                        <td>@item.TongDoanhThu.ToString("N0") VNĐ</td>
-                                    </tr>
-                                }
+                                <tr>
+                                    <td class="fw-bold">@item.TenSanPham</td>
+                                    <td>@item.TongSoLuongBan</td>
+                                    <td class="text-danger fw-bold">@item.TongDoanhThu.ToString("N0") VNĐ</td>
+                                </tr>
                             }
                         </tbody>
                     </table>

@@ -1,8 +1,44 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Trang chủ";
+    Layout = "_Layout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="p-5 mb-4 bg-dark text-white rounded-4 shadow-sm position-relative overflow-hidden">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold text-info">Thế Giới Điện Tử UNETI</h1>
+        <p class="col-md-8 fs-4 text-light">Cung cấp các dòng sản phẩm công nghệ, laptop, điện thoại, máy tính bảng chính hãng, cấu hình mạnh mẽ với mức giá tốt nhất thị trường.</p>
+        <a asp-controller="SanPham" asp-action="Index" class="btn btn-info btn-lg text-dark fw-bold mt-2">
+            <i class="bi bi-bag-check"></i> Khám phá sản phẩm ngay
+        </a>
+    </div>
+</div>
+
+<div class="row text-center g-4 my-4">
+    <div class="col-md-4">
+        <div class="card p-4 h-100 shadow-sm border-0">
+            <div class="card-body">
+                <i class="bi bi-shield-check text-primary fs-1 mb-3"></i>
+                <h5 class="fw-bold">Chính hãng 100%</h5>
+                <p class="text-muted small">Cam kết sản phẩm chất lượng cao, nguồn gốc xuất xứ rõ ràng từ các thương hiệu lớn.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 h-100 shadow-sm border-0">
+            <div class="card-body">
+                <i class="bi bi-truck text-success fs-1 mb-3"></i>
+                <h5 class="fw-bold">Giao hàng siêu tốc</h5>
+                <p class="text-muted small">Vận chuyển nhanh chóng toàn quốc, kiểm tra hàng trước khi thanh toán.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-4 h-100 shadow-sm border-0">
+            <div class="card-body">
+                <i class="bi bi-headset text-warning fs-1 mb-3"></i>
+                <h5 class="fw-bold">Hỗ trợ 24/7</h5>
+                <p class="text-muted small">Đội ngũ kỹ thuật viên tư vấn nhiệt tình, bảo hành chu đáo dài hạn.</p>
+            </div>
+        </div>
+    </div>
 </div>
