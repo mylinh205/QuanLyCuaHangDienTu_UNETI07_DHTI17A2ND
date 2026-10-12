@@ -1,9 +1,9 @@
-
-using Microsoft.AspNetCore.Identity;
+// Họ và tên: Vũ Thành Đạt
+// Mã sinh viên: 23203100069
+// Nội dung thực hiện: Module 4 - Quản lý đơn hàng, Xử lý trạng thái, Dashboard và Thống kê
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data;
-using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models;
 using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels;
 
 namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
@@ -17,209 +17,155 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
             _context = context;
         }
 
-        private bool IsAdmin =>
-            HttpContext.Session.GetInt32("MaTaiKhoan").HasValue &&
-            HttpContext.Session.GetString("VaiTro") == "Admin";
+        // Kiểm tra quyền Admin qua Session
+        private bool CheckAdmin()
+        {
+            return HttpContext.Session.GetString("VaiTro") == "Admin";
+        }
 
-        // =====================================
-        // DASHBOARD
-        // =====================================
-        [HttpGet]
+        // ================= 1. DASHBOARD QUẢN TRỊ =================
         public async Task<IActionResult> Dashboard()
         {
-            if (!IsAdmin)
-                return RedirectToAction("Login", "Account");
+            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
 
-            ViewBag.ProductCount =
-                await _context.SanPhams.CountAsync();
+            var model = new DashboardViewModel
+            {
+                TongLoaiSanPham = await _context.LoaiSanPhams.CountAsync(),
+                TongSanPham = await _context.SanPhams.CountAsync(),
+                TongKhachHang = await _context.KhachHangs.CountAsync(),
+                TongDonHang = await _context.DonHangs.CountAsync(),
+                DonHangChoXacNhan = await _context.DonHangs.CountAsync(d => d.TrangThai == "Chờ xác nhận"),
+                DonHangDangGiao = await _context.DonHangs.CountAsync(d => d.TrangThai == "Đang giao"),
+                DonHangDaHoanThanh = await _context.DonHangs.CountAsync(d => d.TrangThai == "Đã hoàn thành"),
+                SanPhamDangKinhDoanh = await _context.SanPhams.CountAsync(s => s.TrangThai == "Đang kinh doanh")
+            };
 
-            ViewBag.CategoryCount =
-                await _context.LoaiSanPhams.CountAsync();
-
-            ViewBag.AccountCount =
-                await _context.TaiKhoans.CountAsync();
-
-            ViewBag.CustomerCount =
-                await _context.KhachHangs.CountAsync();
-
-            return View();
+            return View(model);
         }
 
-        // =====================================
-        // DANH SÁCH VÀ TÌM KIẾM KHÁCH HÀNG
-        // =====================================
-        [HttpGet]
-        public async Task<IActionResult> Customers(string? q)
+        // ================= 2. QUẢN LÝ ĐƠN HÀNG =================
+        // GET: Admin/QuanLyDonHang
+        public async Task<IActionResult> QuanLyDonHang(string? trangThai)
         {
-            if (!IsAdmin)
-                return RedirectToAction("Login", "Account");
+            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
 
-            var query = _context.KhachHangs
-                .Include(x => x.TaiKhoan)
-                .AsNoTracking()
+            var query = _context.DonHangs
+                .Include(d => d.KhachHang)
                 .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(q))
+            if (!string.IsNullOrEmpty(trangThai))
             {
-                q = q.Trim();
-
-                query = query.Where(x =>
-                    (x.HoTen != null && x.HoTen.Contains(q)) ||
-                    (x.Email != null && x.Email.Contains(q)) ||
-                    (x.SoDienThoai != null &&
-                     x.SoDienThoai.Contains(q)) ||
-                    (x.TaiKhoan != null &&
-                     x.TaiKhoan.TenDangNhap.Contains(q)));
+                query = query.Where(d => d.TrangThai == trangThai);
             }
 
-            ViewBag.Q = q;
+            var danhSachDonHang = await query.OrderByDescending(d => d.NgayDat).ToListAsync();
+            ViewBag.TrangThaiHienTai = trangThai;
+            return View(danhSachDonHang);
+        }
 
-            var customers = await query
-                .OrderBy(x => x.HoTen)
+        // GET: Admin/ChiTietDonHang/5
+        public async Task<IActionResult> ChiTietDonHang(int? id)
+        {
+            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+            if (id == null) return NotFound();
+
+            var donHang = await _context.DonHangs
+                .Include(d => d.KhachHang)
+                .Include(d => d.ChiTietDonHangs)
+                    .ThenInclude(c => c.SanPham)
+                .FirstOrDefaultAsync(m => m.MaDonHang == id);
+
+            if (donHang == null) return NotFound();
+
+            return View(donHang);
+        }
+
+        // POST: Admin/CapNhatTrangThai
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatTrangThai(int maDonHang, string trangThaiMoi)
+        {
+            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+
+            var donHang = await _context.DonHangs
+                .Include(d => d.ChiTietDonHangs)
+                .FirstOrDefaultAsync(d => d.MaDonHang == maDonHang);
+
+            if (donHang == null) return NotFound();
+
+            string trangThaiCu = donHang.TrangThai;
+
+            // Nghiệp vụ: Nếu chuyển từ trạng thái khác sang "Đã hủy" thì hoàn lại số lượng tồn kho sản phẩm
+            if (trangThaiMoi == "Đã hủy" && trangThaiCu != "Đã hủy")
+            {
+                foreach (var item in donHang.ChiTietDonHangs)
+                {
+                    var sp = await _context.SanPhams.FindAsync(item.MaSanPham);
+                    if (sp != null)
+                    {
+                        sp.SoLuongTon += item.SoLuong;
+                    }
+                }
+            }
+
+            donHang.TrangThai = trangThaiMoi;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Đã cập nhật trạng thái đơn hàng #{maDonHang} thành '{trangThaiMoi}' thành công!";
+            return RedirectToAction(nameof(QuanLyDonHang));
+        }
+
+        // ================= 3. THỐNG KÊ DỮ LIỆU & BÁO CÁO LINQ =================
+        public async Task<IActionResult> ThongKe()
+        {
+            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+
+            // 1. Thống kê số lượng sản phẩm theo từng loại (GROUP BY)
+            ViewBag.SanPhamTheoLoai = await _context.SanPhams
+                .GroupBy(s => s.LoaiSanPham!.TenLoai)
+                .Select(g => new { TenLoai = g.Key, SoLuong = g.Count() })
                 .ToListAsync();
 
-            return View(customers);
-        }
+            // 2. Thống kê đơn hàng theo trạng thái
+            ViewBag.DonHangTheoTrangThai = await _context.DonHangs
+                .GroupBy(d => d.TrangThai)
+                .Select(g => new { TrangThai = g.Key, SoLuong = g.Count() })
+                .ToListAsync();
 
-        // =====================================
-        // KHÓA / MỞ KHÓA KHÁCH HÀNG
-        // =====================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleCustomerStatus(int id)
-        {
-            if (!IsAdmin)
-                return Forbid();
+            // 3. Thống kê sản phẩm bán chạy nhất (Chỉ tính đơn đã hoàn thành)
+            ViewBag.SanPhamBanChay = await _context.ChiTietDonHangs
+                .Where(c => c.DonHang!.TrangThai == "Đã hoàn thành")
+                .GroupBy(c => c.SanPham!.TenSanPham)
+                .Select(g => new {
+                    TenSanPham = g.Key,
+                    TongSoLuongBan = g.Sum(c => c.SoLuong),
+                    TongDoanhThu = g.Sum(c => c.ThanhTien)
+                })
+                .OrderByDescending(g => g.TongSoLuongBan)
+                .Take(5) // Lấy top 5 sản phẩm bán chạy
+                .ToListAsync();
 
-            var customer = await _context.KhachHangs
-                .Include(x => x.TaiKhoan)
-                .FirstOrDefaultAsync(x => x.MaKhachHang == id);
+            // 4. Thống kê doanh thu theo tháng
+            // 4. Thống kê doanh thu theo tháng (Đã fix lỗi sắp xếp và định dạng)
+            var thongKeThangRaw = await _context.DonHangs
+                .Where(d => d.TrangThai == "Đã hoàn thành")
+                .GroupBy(d => new { d.NgayDat.Year, d.NgayDat.Month })
+                .Select(g => new {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    TongDoanhThu = g.Sum(d => d.TongTien)
+                })
+                .OrderBy(g => g.Year)
+                .ThenBy(g => g.Month)
+                .ToListAsync(); // Sắp xếp ngay tại phía Database trước khi đưa về RAM
 
-            if (customer == null)
-                return NotFound();
-
-            customer.TrangThai = !customer.TrangThai;
-
-            if (customer.TaiKhoan != null)
-            {
-                customer.TaiKhoan.TrangThai =
-                    customer.TrangThai;
-            }
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = customer.TrangThai
-                ? "Đã mở khóa tài khoản khách hàng."
-                : "Đã khóa tài khoản khách hàng.";
-
-            return RedirectToAction(nameof(Customers));
-        }
-
-        // =====================================
-        // SỬA THÔNG TIN KHÁCH HÀNG
-        // =====================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AdminEdit(
-            AdminKhachHangEditVm vm)
-        {
-            if (!IsAdmin)
-                return Forbid();
-
-            if (vm.NgaySinh.HasValue &&
-                (vm.NgaySinh.Value.Date > DateTime.Today ||
-                 vm.NgaySinh.Value.Year < 1900))
-            {
-                ModelState.AddModelError(
-                    nameof(vm.NgaySinh),
-                    "Ngày sinh không hợp lệ.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                TempData["Error"] = string.Join(" ",
-                    ModelState.Values
-                        .SelectMany(x => x.Errors)
-                        .Select(x => x.ErrorMessage));
-
-                return RedirectToAction(nameof(Customers));
-            }
-
-            var customer = await _context.KhachHangs
-                .FirstOrDefaultAsync(
-                    x => x.MaKhachHang == vm.MaKhachHang);
-
-            if (customer == null)
-                return NotFound();
-
-            customer.HoTen = vm.HoTen.Trim();
-            customer.NgaySinh = vm.NgaySinh;
-            customer.GioiTinh = vm.GioiTinh?.Trim();
-            customer.SoDienThoai = vm.SoDienThoai?.Trim();
-            customer.Email = vm.Email?.Trim();
-            customer.DiaChi = vm.DiaChi?.Trim();
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] =
-                "Cập nhật thông tin khách hàng thành công.";
-
-            return RedirectToAction(nameof(Customers));
-        }
-
-        // =====================================
-        // ĐẶT LẠI MẬT KHẨU KHÁCH HÀNG
-        // =====================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(
-            AdminResetPasswordVm vm)
-        {
-            if (!IsAdmin)
-                return Forbid();
-
-            if (!ModelState.IsValid)
-            {
-                TempData["Error"] = string.Join(" ",
-                    ModelState.Values
-                        .SelectMany(x => x.Errors)
-                        .Select(x => x.ErrorMessage));
-
-                return RedirectToAction(nameof(Customers));
-            }
-
-            var customer = await _context.KhachHangs
-                .Include(x => x.TaiKhoan)
-                .FirstOrDefaultAsync(
-                    x => x.MaKhachHang == vm.MaKhachHang);
-
-            if (customer == null ||
-                customer.TaiKhoan == null)
-            {
-                TempData["Error"] =
-                    "Không tìm thấy tài khoản khách hàng.";
-
-                return RedirectToAction(nameof(Customers));
-            }
-
-            // Không cho phép đặt lại mật khẩu Admin
-            // qua chức năng quản lý khách hàng.
-            if (customer.TaiKhoan.VaiTro != "KhachHang")
-                return Forbid();
-
-            var hasher = new PasswordHasher<TaiKhoan>();
-
-            customer.TaiKhoan.MatKhau =
-                hasher.HashPassword(
-                    customer.TaiKhoan,
-                    vm.MatKhauMoi);
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] =
-                "Đặt lại mật khẩu khách hàng thành công.";
-
-            return RedirectToAction(nameof(Customers));
+            ViewBag.DoanhThuTheoThang = thongKeThangRaw
+                .Select(g => new {
+                    ThangNam = $"{g.Month:D2}/{g.Year}",
+                    TongDoanhThu = g.TongDoanhThu
+                })
+                .ToList();
+            return View();
         }
     }
 }

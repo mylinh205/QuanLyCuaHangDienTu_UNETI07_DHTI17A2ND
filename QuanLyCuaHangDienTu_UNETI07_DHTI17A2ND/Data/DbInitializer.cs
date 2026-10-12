@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +18,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
             // =====================================
             // 1. TẠO TÀI KHOẢN ADMIN
             // =====================================
-            if (!context.TaiKhoans.Any(
-                x => x.TenDangNhap == "admin"))
+            if (!context.TaiKhoans.Any(x => x.TenDangNhap == "admin"))
             {
                 var admin = new TaiKhoan
                 {
@@ -221,8 +219,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
 
             foreach (var group in productGroups)
             {
-                bool exists = categories.Any(
-                    x => x.TenLoai == group.Category);
+                bool exists = categories.Any(x => x.TenLoai == group.Category);
 
                 if (!exists)
                 {
@@ -240,72 +237,155 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
             context.SaveChanges();
 
             // =====================================
-            // 4. TẠO SẢN PHẨM MẪU
+            // 4. TẠO SẢN PHẨM MẪU (Nếu chưa có)
             // =====================================
-            // Giữ nguyên cách seed ban đầu:
-            // Nếu đã có sản phẩm, không thêm lại.
-            if (context.SanPhams.Any())
-                return;
-
-            var categoryByName = categories
-                .ToDictionary(x => x.TenLoai);
-
-            var products = new List<SanPham>();
-
-            int productIndex = 0;
-
-            foreach (var group in productGroups)
+            if (!context.SanPhams.Any())
             {
-                for (int i = 0; i < group.Names.Length; i++)
+                var categoryByName = categories.ToDictionary(x => x.TenLoai);
+                var products = new List<SanPham>();
+                int productIndex = 0;
+
+                foreach (var group in productGroups)
                 {
-                    string status;
+                    for (int i = 0; i < group.Names.Length; i++)
+                    {
+                        string status;
 
-                    if (productIndex == 23 ||
-                        productIndex == 57 ||
-                        productIndex == 88 ||
-                        productIndex == 96)
-                    {
-                        status = "Tạm ngừng";
-                    }
-                    else if (productIndex == 49 ||
-                             productIndex == 79)
-                    {
-                        status = "Ngừng kinh doanh";
-                    }
-                    else
-                    {
-                        status = "Đang kinh doanh";
-                    }
+                        if (productIndex == 23 || productIndex == 57 || productIndex == 88 || productIndex == 96)
+                        {
+                            status = "Tạm ngừng";
+                        }
+                        else if (productIndex == 49 || productIndex == 79)
+                        {
+                            status = "Ngừng kinh doanh";
+                        }
+                        else
+                        {
+                            status = "Đang kinh doanh";
+                        }
 
-                    var product = new SanPham
-                    {
-                        TenSanPham = group.Names[i],
-                        MaLoai = categoryByName[
-                            group.Category].MaLoai,
-                        ThuongHieu = group.Brand,
-                        DonGia = group.StartingPrice +
-                                 group.PriceStep * i,
-                        SoLuongTon = 5 +
-                            (productIndex * 7 % 36),
-                        ThoiGianBaoHanh =
-                            group.WarrantyMonths,
-                        MoTa = $"{group.Category} " +
-                               $"{group.Brand} chính hãng, " +
-                               $"bảo hành {group.WarrantyMonths} tháng.",
-                        TrangThai = status
-                    };
+                        var product = new SanPham
+                        {
+                            TenSanPham = group.Names[i],
+                            MaLoai = categoryByName[group.Category].MaLoai,
+                            ThuongHieu = group.Brand,
+                            DonGia = group.StartingPrice + group.PriceStep * i,
+                            SoLuongTon = 5 + (productIndex * 7 % 36),
+                            ThoiGianBaoHanh = group.WarrantyMonths,
+                            MoTa = $"{group.Category} {group.Brand} chính hãng, bảo hành {group.WarrantyMonths} tháng.",
+                            TrangThai = status
+                        };
 
-                    products.Add(product);
-                    productIndex++;
+                        products.Add(product);
+                        productIndex++;
+                    }
                 }
+
+                context.SanPhams.AddRange(products);
+                context.SaveChanges();
             }
 
-            context.SanPhams.AddRange(products);
-            context.SaveChanges();
+            // =====================================
+            // 5. TẠO KHÁCH HÀNG & ĐƠN HÀNG MẪU (Cho phần Thống kê / Sinh viên 4)
+            // =====================================
+            if (!context.DonHangs.Any())
+            {
+                // Tạo tài khoản khách hàng mẫu nếu chưa có
+                var tkKhach = context.TaiKhoans.FirstOrDefault(x => x.TenDangNhap == "khachhang01");
+                if (tkKhach == null)
+                {
+                    tkKhach = new TaiKhoan
+                    {
+                        TenDangNhap = "khachhang01",
+                        HoTen = "Nguyễn Văn Khách",
+                        Email = "khachhang@uneti.local",
+                        VaiTro = "KhachHang",
+                        TrangThai = true
+                    };
+                    tkKhach.MatKhau = new PasswordHasher<TaiKhoan>().HashPassword(tkKhach, "123456");
+                    context.TaiKhoans.Add(tkKhach);
+                    context.SaveChanges();
+                }
+
+                // Tạo thông tin Khách hàng nếu chưa liên kết
+                var khachHang = context.KhachHangs.FirstOrDefault(x => x.MaTaiKhoan == tkKhach.MaTaiKhoan);
+                if (khachHang == null)
+                {
+                    khachHang = new KhachHang
+                    {
+                        MaTaiKhoan = tkKhach.MaTaiKhoan,
+                        HoTen = tkKhach.HoTen,
+                        SoDienThoai = "0987654321",
+                        Email = tkKhach.Email,
+                        DiaChi = "Hà Nội",
+                        NgayDangKy = DateTime.Now.AddDays(-10)
+                    };
+                    context.KhachHangs.Add(khachHang);
+                    context.SaveChanges();
+                }
+
+                // Lấy ra một vài sản phẩm có sẵn để làm chi tiết đơn hàng
+                var listSanPham = context.SanPhams.Take(2).ToList();
+                if (listSanPham.Count >= 2)
+                {
+                    var sp1 = listSanPham[0];
+                    var sp2 = listSanPham[1];
+
+                    // Đơn hàng 1: Đã hoàn thành (Dùng để test Thống kê doanh thu & Sản phẩm bán chạy)
+                    var donHang1 = new DonHang
+                    {
+                        MaKhachHang = khachHang.MaKhachHang,
+                        NgayDat = DateTime.Now.AddDays(-3),
+                        DiaChiGiaoHang = khachHang.DiaChi ?? "Hà Nội",
+                        TongTien = (sp1.DonGia * 1) + (sp2.DonGia * 2),
+                        TrangThai = "Đã hoàn thành",
+                        ChiTietDonHangs = new List<ChiTietDonHang>
+                        {
+                            new ChiTietDonHang
+                            {
+                                MaSanPham = sp1.MaSanPham,
+                                SoLuong = 1,
+                                DonGia = sp1.DonGia,
+                                ThanhTien = sp1.DonGia * 1
+                            },
+                            new ChiTietDonHang
+                            {
+                                MaSanPham = sp2.MaSanPham,
+                                SoLuong = 2,
+                                DonGia = sp2.DonGia,
+                                ThanhTien = sp2.DonGia * 2
+                            }
+                        }
+                    };
+
+                    // Đơn hàng 2: Chờ xác nhận (Dùng để test Quản lý danh sách đơn hàng)
+                    var donHang2 = new DonHang
+                    {
+                        MaKhachHang = khachHang.MaKhachHang,
+                        NgayDat = DateTime.Now.AddDays(-1),
+                        DiaChiGiaoHang = khachHang.DiaChi ?? "Hà Nội",
+                        TongTien = sp1.DonGia * 1,
+                        TrangThai = "Chờ xác nhận",
+                        ChiTietDonHangs = new List<ChiTietDonHang>
+                        {
+                            new ChiTietDonHang
+                            {
+                                MaSanPham = sp1.MaSanPham,
+                                SoLuong = 1,
+                                DonGia = sp1.DonGia,
+                                ThanhTien = sp1.DonGia * 1
+                            }
+                        }
+                    };
+
+                    context.DonHangs.AddRange(donHang1, donHang2);
+                    context.SaveChanges();
+                }
+            }
         }
 
         // =====================================
-        // 5. LỚP LƯU DỮ LIỆU NHÓM
+        // 6. LỚP LƯU DỮ LIỆU NHÓM
         // =====================================
         private sealed record ProductGroup(
             string Category,
