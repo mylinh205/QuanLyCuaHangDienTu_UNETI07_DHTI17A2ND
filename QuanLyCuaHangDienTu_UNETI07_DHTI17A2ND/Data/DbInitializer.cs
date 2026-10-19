@@ -287,6 +287,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
             }
 
             context.SaveChanges();
+        }
 
         private static string GetProductImageUrl(string brand, string productName)
         {
