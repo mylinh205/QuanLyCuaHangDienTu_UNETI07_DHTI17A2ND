@@ -238,57 +238,50 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
             context.SaveChanges();
 
             // =====================================
-            // 4. TẠO SẢN PHẨM MẪU (Nếu chưa có)
+            // 4. ĐỒNG BỘ SẢN PHẨM MẪU
             // =====================================
-            if (!context.SanPhams.Any())
+            var categoryByName = categories.ToDictionary(x => x.TenLoai);
+            var existingProducts = context.SanPhams.ToList();
+            int productIndex = 0;
+
+            foreach (var group in productGroups)
             {
-                var categoryByName = categories.ToDictionary(x => x.TenLoai);
-                var products = new List<SanPham>();
-                int productIndex = 0;
-
-                foreach (var group in productGroups)
+                for (int i = 0; i < group.Names.Length; i++)
                 {
-                    for (int i = 0; i < group.Names.Length; i++)
+                    string name = group.Names[i];
+                    int categoryId = categoryByName[group.Category].MaLoai;
+                    string status = productIndex == 23 || productIndex == 57 || productIndex == 88 || productIndex == 96
+                        ? "Tạm ngừng"
+                        : productIndex == 49 || productIndex == 79
+                            ? "Ngừng kinh doanh"
+                            : "Đang kinh doanh";
+
+                    var product = existingProducts.FirstOrDefault(
+                        x => x.MaLoai == categoryId && x.TenSanPham == name);
+
+                    if (product == null)
                     {
-                        string status;
-
-                        if (productIndex == 23 || productIndex == 57 || productIndex == 88 || productIndex == 96)
+                        product = new SanPham
                         {
-                            status = "Tạm ngừng";
-                        }
-                        else if (productIndex == 49 || productIndex == 79)
-                        {
-                            status = "Ngừng kinh doanh";
-                        }
-                        else
-                        {
-                            status = "Đang kinh doanh";
-                        }
-
-                        var product = new SanPham
-                        {
-                            TenSanPham = group.Names[i],
-                            MaLoai = categoryByName[group.Category].MaLoai,
-                            ThuongHieu = group.Brand,
-                            DonGia = group.StartingPrice + group.PriceStep * i,
+                            TenSanPham = name,
+                            MaLoai = categoryId,
                             SoLuongTon = 5 + (productIndex * 7 % 36),
-                            ThoiGianBaoHanh = group.WarrantyMonths,
-                            MoTa = $"{group.Category} {group.Brand} chính hãng, bảo hành {group.WarrantyMonths} tháng.",
-
-
-
-                            TrangThai = status,
-                            HinhAnh = GetProductImageUrl(group.Brand, group.Names[i])
+                            HinhAnh = GetProductImageUrl(group.Brand, name)
                         };
-
-                        products.Add(product);
-                        productIndex++;
+                        context.SanPhams.Add(product);
+                        existingProducts.Add(product);
                     }
-                }
 
-                context.SanPhams.AddRange(products);
-                context.SaveChanges();
+                    product.ThuongHieu = group.Brand;
+                    product.DonGia = group.StartingPrice + group.PriceStep * i;
+                    product.ThoiGianBaoHanh = group.WarrantyMonths;
+                    product.MoTa = $"{group.Category} {group.Brand} chính hãng, bảo hành {group.WarrantyMonths} tháng.";
+                    product.TrangThai = status;
+                    productIndex++;
+                }
             }
+
+            context.SaveChanges();
 
             var seededImageQuery = "?auto=format&fit=crop&w=1000&q=80";
             var productsWithCategoryImages = context.SanPhams

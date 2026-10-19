@@ -297,82 +297,6 @@
         </div>
     </form>
 
-<<<<<<< HEAD
-    <div class="table-wrap">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Mã</th>
-                        <th>Sản phẩm</th>
-                        <th>Loại</th>
-                        <th>Thương hiệu</th>
-                        <th class="text-end">Đơn giá</th>
-                        <th class="text-center">Tồn kho</th>
-                        <th>Trạng thái</th>
-                        @if (isAdmin)
-                        {
-                            <th class="text-center">Thao tác</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.SanPhams.Count > 0)
-                    {
-                        @foreach (var product in Model.SanPhams)
-                        {
-                            var statusClass = product.TrangThai switch
-                            {
-                                "Đang kinh doanh" => "status-active",
-                                "Tạm ngừng" => "status-paused",
-                                _ => "status-stopped"
-                            };
-                            <tr>
-                                <td class="text-muted fw-semibold">#@product.MaSanPham</td>
-                                <td>
-                                    <a asp-action="Details" asp-route-id="@product.MaSanPham" class="product-name text-decoration-none">
-                                        @product.TenSanPham
-                                    </a>
-                                </td>
-                                <td><span class="badge bg-light text-dark border">@(product.LoaiSanPham?.TenLoai ?? "Chưa phân loại")</span></td>
-                                <td class="fw-medium">@product.ThuongHieu</td>
-                                <td class="price text-end">@product.DonGia.ToString("N0") đ</td>
-                                <td class="text-center fw-semibold">@product.SoLuongTon</td>
-                                <td><span class="status @statusClass">@product.TrangThai</span></td>
-                                @if (isAdmin)
-                                {
-                                    <td>
-                                        <div class="d-flex flex-column gap-2 py-1">
-                                            <div class="d-flex gap-1 justify-content-center">
-                                                <a asp-action="Edit" asp-route-id="@product.MaSanPham" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> Sửa</a>
-                                                <a asp-action="Delete" asp-route-id="@product.MaSanPham" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</a>
-                                            </div>
-                                            <form asp-action="UpdateStatus" asp-route-id="@product.MaSanPham" method="post" class="d-flex gap-1">
-                                                <select name="status" class="form-select form-select-sm" aria-label="Trạng thái mới">
-                                                    <option value="Đang kinh doanh" selected="@(product.TrangThai == "Đang kinh doanh")">Đang kinh doanh</option>
-                                                    <option value="Tạm ngừng" selected="@(product.TrangThai == "Tạm ngừng")">Tạm ngừng</option>
-                                                    <option value="Ngừng kinh doanh" selected="@(product.TrangThai == "Ngừng kinh doanh")">Ngừng kinh doanh</option>
-                                                </select>
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Cập nhật nhanh trạng thái"><i class="bi bi-check2"></i></button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                }
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="@(isAdmin ? 8 : 7)" class="text-muted py-5 text-center">
-                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
-                                Không tìm thấy sản phẩm phù hợp với điều kiện đã chọn.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-=======
     @if (Model.SanPhams.Count > 0)
     {
         <div class="catalog-grid">
@@ -390,11 +314,10 @@
                     var imageSearchTerms = Uri.EscapeDataString($"{product.ThuongHieu} {product.TenSanPham}");
                     imageUrl = $"https://tse1.mm.bing.net/th?q={imageSearchTerms}";
                 }
+
                 <article class="catalog-card">
                     <a asp-action="Details" asp-route-id="@product.MaSanPham" class="catalog-image-link" aria-label="Xem @product.TenSanPham">
-                        <img src="@imageUrl"
-                             alt="@product.TenSanPham"
-                             class="catalog-image" />
+                        <img src="@imageUrl" alt="@product.TenSanPham" class="catalog-image" />
                         <span class="catalog-code">Mã #@product.MaSanPham</span>
                     </a>
                     <div class="catalog-card-body">
@@ -433,7 +356,6 @@
                     </div>
                 </article>
             }
->>>>>>> 72542d2f8da0a97de916af25f392bfcf982b2032
         </div>
     }
     else

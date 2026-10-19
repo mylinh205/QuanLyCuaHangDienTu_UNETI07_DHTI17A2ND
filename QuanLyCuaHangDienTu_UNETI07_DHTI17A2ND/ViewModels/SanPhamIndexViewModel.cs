@@ -1,5 +1,5 @@
-﻿// Họ và tên: [Họ và tên của bạn]
-// Mã sinh viên: [Mã sinh viên của bạn]
+﻿// Họ và tên: [Nguyễn Văn Dũng ]
+// Mã sinh viên: [23203100024]
 // Nội dung thực hiện: Module 2 - ViewModel phục vụ Tìm kiếm, Lọc, Sắp xếp, Phân trang Sản phẩm
 using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models;
 
