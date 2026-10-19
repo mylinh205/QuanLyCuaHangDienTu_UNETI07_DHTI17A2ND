@@ -1,4 +1,7 @@
-﻿namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels
+﻿// Họ và tên: Vũ Thành Đạt
+// Mã sinh viên: 23203100069
+// Nội dung thực hiện: Module 4 - Quản lý đơn hàng, Xử lý trạng thái, Dashboard và Thống kê
+namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels
 {
     public class ThongKeViewModel
     {

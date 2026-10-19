@@ -11,35 +11,45 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
     {
         public static void Initialize(ApplicationDbContext context)
         {
-            // Chỉ dùng EnsureCreated khi dự án không sử dụng Migrations.
-            // Nếu database đã tồn tại, lệnh này không cập nhật cấu trúc bảng.
+            // Chỉ dùng EnsureCreated nếu không dùng Migrations.
             context.Database.EnsureCreated();
             context.Database.ExecuteSqlRaw("IF COL_LENGTH('SanPhams', 'HinhAnh') IS NULL ALTER TABLE SanPhams ADD HinhAnh NVARCHAR(500) NULL;");
 
-            // =====================================
-            // 1. TẠO TÀI KHOẢN ADMIN
-            // =====================================
-            if (!context.TaiKhoans.Any(x => x.TenDangNhap == "admin"))
+            SeedAdmin(context);
+            SeedProducts(context);
+            SeedModule3(context);
+        }
+
+        // =====================================
+        // 1. TẠO TÀI KHOẢN ADMIN
+        // =====================================
+        private static void SeedAdmin(ApplicationDbContext context)
+        {
+            if (context.TaiKhoans.Any(
+                x => x.TenDangNhap == "admin"))
+                return;
+
+            var admin = new TaiKhoan
             {
-                var admin = new TaiKhoan
-                {
-                    TenDangNhap = "admin",
-                    HoTen = "Quản trị viên",
-                    Email = "admin@uneti.local",
-                    VaiTro = "Admin",
-                    TrangThai = true
-                };
+                TenDangNhap = "admin",
+                HoTen = "Quản trị viên",
+                Email = "admin@uneti.local",
+                VaiTro = "Admin",
+                TrangThai = true
+            };
 
-                admin.MatKhau = new PasswordHasher<TaiKhoan>()
-                    .HashPassword(admin, "Admin@123");
+            admin.MatKhau = new PasswordHasher<TaiKhoan>()
+                .HashPassword(admin, "Admin@123");
 
-                context.TaiKhoans.Add(admin);
-                context.SaveChanges();
-            }
+            context.TaiKhoans.Add(admin);
+            context.SaveChanges();
+        }
 
-            // =====================================
-            // 2. DỮ LIỆU MẪU SẢN PHẨM
-            // =====================================
+        // =====================================
+        // 2. TẠO DANH MỤC VÀ 100 SẢN PHẨM
+        // =====================================
+        private static void SeedProducts(ApplicationDbContext context)
+        {
             var productGroups = new[]
             {
                 new ProductGroup(
@@ -213,26 +223,21 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                     })
             };
 
-            // =====================================
-            // 3. TẠO LOẠI SẢN PHẨM
-            // =====================================
             var categories = context.LoaiSanPhams.ToList();
 
             foreach (var group in productGroups)
             {
-                bool exists = categories.Any(x => x.TenLoai == group.Category);
+                if (categories.Any(x => x.TenLoai == group.Category))
+                    continue;
 
-                if (!exists)
+                var category = new LoaiSanPham
                 {
-                    var category = new LoaiSanPham
-                    {
-                        TenLoai = group.Category,
-                        TrangThai = true
-                    };
+                    TenLoai = group.Category,
+                    TrangThai = true
+                };
 
-                    context.LoaiSanPhams.Add(category);
-                    categories.Add(category);
-                }
+                context.LoaiSanPhams.Add(category);
+                categories.Add(category);
             }
 
             context.SaveChanges();
@@ -283,117 +288,6 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
 
             context.SaveChanges();
 
-            var seededImageQuery = "?auto=format&fit=crop&w=1000&q=80";
-            var productsWithCategoryImages = context.SanPhams
-                .Where(product => product.HinhAnh == null || product.HinhAnh.Contains(seededImageQuery))
-                .ToList();
-
-            foreach (var product in productsWithCategoryImages)
-                product.HinhAnh = GetProductImageUrl(product.ThuongHieu, product.TenSanPham);
-
-            if (productsWithCategoryImages.Count > 0)
-                context.SaveChanges();
-
-            // =====================================
-            // 5. TẠO KHÁCH HÀNG & ĐƠN HÀNG MẪU (Cho phần Thống kê / Sinh viên 4)
-            // =====================================
-            if (!context.DonHangs.Any())
-            {
-                // Tạo tài khoản khách hàng mẫu nếu chưa có
-                var tkKhach = context.TaiKhoans.FirstOrDefault(x => x.TenDangNhap == "khachhang01");
-                if (tkKhach == null)
-                {
-                    tkKhach = new TaiKhoan
-                    {
-                        TenDangNhap = "khachhang01",
-                        HoTen = "Nguyễn Văn Khách",
-                        Email = "khachhang@uneti.local",
-                        VaiTro = "KhachHang",
-                        TrangThai = true
-                    };
-                    tkKhach.MatKhau = new PasswordHasher<TaiKhoan>().HashPassword(tkKhach, "123456");
-                    context.TaiKhoans.Add(tkKhach);
-                    context.SaveChanges();
-                }
-
-                // Tạo thông tin Khách hàng nếu chưa liên kết
-                var khachHang = context.KhachHangs.FirstOrDefault(x => x.MaTaiKhoan == tkKhach.MaTaiKhoan);
-                if (khachHang == null)
-                {
-                    khachHang = new KhachHang
-                    {
-                        MaTaiKhoan = tkKhach.MaTaiKhoan,
-                        HoTen = tkKhach.HoTen,
-                        SoDienThoai = "0987654321",
-                        Email = tkKhach.Email,
-                        DiaChi = "Hà Nội",
-                        NgayDangKy = DateTime.Now.AddDays(-10)
-                    };
-                    context.KhachHangs.Add(khachHang);
-                    context.SaveChanges();
-                }
-
-                // Lấy ra một vài sản phẩm có sẵn để làm chi tiết đơn hàng
-                var listSanPham = context.SanPhams.Take(2).ToList();
-                if (listSanPham.Count >= 2)
-                {
-                    var sp1 = listSanPham[0];
-                    var sp2 = listSanPham[1];
-
-                    // Đơn hàng 1: Đã hoàn thành (Dùng để test Thống kê doanh thu & Sản phẩm bán chạy)
-                    var donHang1 = new DonHang
-                    {
-                        MaKhachHang = khachHang.MaKhachHang,
-                        NgayDat = DateTime.Now.AddDays(-3),
-                        DiaChiGiaoHang = khachHang.DiaChi ?? "Hà Nội",
-                        TongTien = (sp1.DonGia * 1) + (sp2.DonGia * 2),
-                        TrangThai = "Đã hoàn thành",
-                        ChiTietDonHangs = new List<ChiTietDonHang>
-                        {
-                            new ChiTietDonHang
-                            {
-                                MaSanPham = sp1.MaSanPham,
-                                SoLuong = 1,
-                                DonGia = sp1.DonGia,
-                                ThanhTien = sp1.DonGia * 1
-                            },
-                            new ChiTietDonHang
-                            {
-                                MaSanPham = sp2.MaSanPham,
-                                SoLuong = 2,
-                                DonGia = sp2.DonGia,
-                                ThanhTien = sp2.DonGia * 2
-                            }
-                        }
-                    };
-
-                    // Đơn hàng 2: Chờ xác nhận (Dùng để test Quản lý danh sách đơn hàng)
-                    var donHang2 = new DonHang
-                    {
-                        MaKhachHang = khachHang.MaKhachHang,
-                        NgayDat = DateTime.Now.AddDays(-1),
-                        DiaChiGiaoHang = khachHang.DiaChi ?? "Hà Nội",
-                        TongTien = sp1.DonGia * 1,
-                        TrangThai = "Chờ xác nhận",
-                        ChiTietDonHangs = new List<ChiTietDonHang>
-                        {
-                            new ChiTietDonHang
-                            {
-                                MaSanPham = sp1.MaSanPham,
-                                SoLuong = 1,
-                                DonGia = sp1.DonGia,
-                                ThanhTien = sp1.DonGia * 1
-                            }
-                        }
-                    };
-
-                    context.DonHangs.AddRange(donHang1, donHang2);
-                    context.SaveChanges();
-                }
-            }
-
-        }
-
         private static string GetProductImageUrl(string brand, string productName)
         {
             var searchTerms = Uri.EscapeDataString($"{brand} {productName}");
@@ -401,7 +295,180 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
         }
 
         // =====================================
-        // 6. LỚP LƯU DỮ LIỆU NHÓM
+        // 3. MODULE 3 - QUẢN LÝ KHÁCH HÀNG
+        // =====================================
+        private static void SeedModule3(ApplicationDbContext context)
+        {
+            // Dữ liệu dùng cho học tập/thử nghiệm.
+            // Email và tên đăng nhập được thay bằng dữ liệu demo.
+            var customers = new[]
+            {
+                new CustomerSeed(
+                    "khachhang_demo01",
+                    "Phạm Thành",
+                    "thanh.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo02",
+                    "Đào Minh Long",
+                    "long.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo1",
+                    "Khách hàng mẫu 1",
+                    "khachhang1@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo2",
+                    "Khách hàng mẫu 2",
+                    "khachhang2@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo3",
+                    "Nguyễn Văn Dũng",
+                    "dung.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo4",
+                    "Vũ Thành Đạt",
+                    "dat.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo5",
+                    "Nguyễn Văn An",
+                    "an.demo@example.com")
+            };
+
+            var hasher = new PasswordHasher<TaiKhoan>();
+
+            // =====================================
+            // 3.1. TẠO TÀI KHOẢN VÀ KHÁCH HÀNG
+            // =====================================
+            foreach (var item in customers)
+            {
+                // Ưu tiên tìm khách hàng đã tồn tại
+                // theo email demo hoặc họ tên.
+                // Kiểm tra họ tên chỉ phù hợp với bộ
+                // dữ liệu mẫu này, không dùng làm khóa
+                // định danh trong hệ thống thực tế.
+                var existingCustomer = context.KhachHangs
+                    .FirstOrDefault(x =>
+                        x.Email == item.Email ||
+                        x.HoTen == item.Name);
+
+                // Nếu khách hàng đã tồn tại,
+                // giữ nguyên dữ liệu và tài khoản cũ.
+                if (existingCustomer != null)
+                    continue;
+
+                var account = context.TaiKhoans
+                    .FirstOrDefault(x =>
+                        x.TenDangNhap == item.Username);
+
+                if (account == null)
+                {
+                    account = new TaiKhoan
+                    {
+                        TenDangNhap = item.Username,
+                        HoTen = item.Name,
+                        Email = item.Email,
+                        VaiTro = "KhachHang",
+                        TrangThai = true
+                    };
+
+                    account.MatKhau = hasher.HashPassword(
+                        account, "Demo@12345");
+
+                    context.TaiKhoans.Add(account);
+                    context.SaveChanges();
+                }
+
+                // Không tạo khách hàng thứ hai cho
+                // cùng một tài khoản.
+                if (context.KhachHangs.Any(
+                    x => x.MaTaiKhoan == account.MaTaiKhoan))
+                    continue;
+
+                context.KhachHangs.Add(new KhachHang
+                {
+                    MaTaiKhoan = account.MaTaiKhoan,
+                    HoTen = item.Name,
+                    Email = item.Email,
+                    NgayDangKy = DateTime.Now,
+                    TrangThai = true
+                });
+
+                context.SaveChanges();
+            }
+
+            // =====================================
+            // 3.2. TẠO 2 ĐƠN HÀNG VÀ CHI TIẾT
+            // =====================================
+            var demoOrders = new[]
+            {
+                new OrderSeed(
+                    "Khách hàng mẫu 1",
+                    "WH-1000XM5 chống ồn",
+                    "Địa chỉ giao hàng mẫu 1"),
+
+                new OrderSeed(
+                    "Khách hàng mẫu 2",
+                    "WF-C700N chống ồn",
+                    "Địa chỉ giao hàng mẫu 2")
+            };
+
+            foreach (var item in demoOrders)
+            {
+                var customer = context.KhachHangs
+                    .FirstOrDefault(x => x.HoTen == item.CustomerName);
+
+                if (customer == null)
+                    continue;
+
+                var product = context.SanPhams
+                    .FirstOrDefault(x =>
+                        x.TenSanPham == item.ProductName);
+
+                if (product == null)
+                    continue;
+
+                // Không tạo đơn demo trùng.
+                bool orderExists = context.DonHangs.Any(x =>
+                    x.MaKhachHang == customer.MaKhachHang &&
+                    x.DiaChiGiaoHang == item.Address);
+
+                if (orderExists)
+                    continue;
+
+                decimal price = product.DonGia;
+
+                var order = new DonHang
+                {
+                    MaKhachHang = customer.MaKhachHang,
+                    NgayDat = DateTime.Now,
+                    DiaChiGiaoHang = item.Address,
+                    TongTien = price,
+                    TrangThai = "Chờ xác nhận",
+
+                    ChiTietDonHangs = new List<ChiTietDonHang>
+                    {
+                        new ChiTietDonHang
+                        {
+                            MaSanPham = product.MaSanPham,
+                            SoLuong = 1,
+                            DonGia = price,
+                            ThanhTien = price
+                        }
+                    }
+                };
+
+                context.DonHangs.Add(order);
+                context.SaveChanges();
+            }
+        }
+
+        // =====================================
+        // 4. CÁC LỚP LƯU DỮ LIỆU MẪU
         // =====================================
         private sealed record ProductGroup(
             string Category,
@@ -410,5 +477,15 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
             decimal PriceStep,
             int WarrantyMonths,
             string[] Names);
+
+        private sealed record CustomerSeed(
+            string Username,
+            string Name,
+            string Email);
+
+        private sealed record OrderSeed(
+            string CustomerName,
+            string ProductName,
+            string Address);
     }
 }
