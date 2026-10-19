@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +13,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
         {
             // Chỉ dùng EnsureCreated nếu không dùng Migrations.
             context.Database.EnsureCreated();
+            context.Database.ExecuteSqlRaw("IF COL_LENGTH('SanPhams', 'HinhAnh') IS NULL ALTER TABLE SanPhams ADD HinhAnh NVARCHAR(500) NULL;");
 
             SeedAdmin(context);
             SeedProducts(context);
@@ -255,26 +255,28 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
 
             foreach (var group in productGroups)
             {
-                for (int i = 0; i < group.Names.Length; i++)
-                {
-                    string status;
+                var categoryByName = categories.ToDictionary(x => x.TenLoai);
+                var products = new List<SanPham>();
+                int productIndex = 0;
 
-                    if (productIndex == 23 ||
-                        productIndex == 57 ||
-                        productIndex == 88 ||
-                        productIndex == 96)
+                foreach (var group in productGroups)
+                {
+                    for (int i = 0; i < group.Names.Length; i++)
                     {
-                        status = "Tạm ngừng";
-                    }
-                    else if (productIndex == 49 ||
-                             productIndex == 79)
-                    {
-                        status = "Ngừng kinh doanh";
-                    }
-                    else
-                    {
-                        status = "Đang kinh doanh";
-                    }
+                        string status;
+
+                        if (productIndex == 23 || productIndex == 57 || productIndex == 88 || productIndex == 96)
+                        {
+                            status = "Tạm ngừng";
+                        }
+                        else if (productIndex == 49 || productIndex == 79)
+                        {
+                            status = "Ngừng kinh doanh";
+                        }
+                        else
+                        {
+                            status = "Đang kinh doanh";
+                        }
 
                     products.Add(new SanPham
                     {
@@ -295,8 +297,12 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                 }
             }
 
-            context.SanPhams.AddRange(products);
-            context.SaveChanges();
+        }
+
+        private static string GetProductImageUrl(string brand, string productName)
+        {
+            var searchTerms = Uri.EscapeDataString($"{brand} {productName}");
+            return $"https://tse1.mm.bing.net/th?q={searchTerms}";
         }
 
         // =====================================

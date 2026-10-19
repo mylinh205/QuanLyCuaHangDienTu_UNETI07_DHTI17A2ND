@@ -1,5 +1,5 @@
-﻿// Họ và tên: [Họ và tên của bạn]
-// Mã sinh viên: [Mã sinh viên của bạn]
+﻿// Họ và tên: [Nguyễn Văn Dũng ]
+// Mã sinh viên: [23203100024]
 // Nội dung thực hiện: Module 2 - Thiết kế Entity SanPham và Data Annotations
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -28,6 +28,10 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models
         [StringLength(100)]
         [Display(Name = "Xuất xứ")]
         public string? XuatXu { get; set; }
+
+        [StringLength(500, ErrorMessage = "Đường dẫn ảnh không vượt quá 500 ký tự.")]
+        [Display(Name = "Ảnh sản phẩm")]
+        public string? HinhAnh { get; set; }
 
         [Required(ErrorMessage = "Đơn giá bắt buộc nhập.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Đơn giá phải lớn hơn 0.")]

@@ -24,14 +24,14 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
             var list = await _context.LoaiSanPhams.ToListAsync();
-            return View(list);
+            return View("~/Views/Admin/LoaiSanPham/Index.cshtml", list);
         }
 
         // GET: LoaiSanPham/Create
         public IActionResult Create()
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
-            return View();
+            return View("~/Views/Admin/LoaiSanPham/Create.cshtml");
         }
 
         // POST: LoaiSanPham/Create
@@ -46,7 +46,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
                 if (await _context.LoaiSanPhams.AnyAsync(l => l.TenLoai == loai.TenLoai))
                 {
                     ModelState.AddModelError("TenLoai", "Tên loại sản phẩm đã tồn tại.");
-                    return View(loai);
+                    return View("~/Views/Admin/LoaiSanPham/Create.cshtml", loai);
                 }
 
                 _context.Add(loai);
@@ -54,7 +54,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
                 TempData["Success"] = "Thêm loại sản phẩm thành công!";
                 return RedirectToAction(nameof(Index));
             }
-            return View(loai);
+            return View("~/Views/Admin/LoaiSanPham/Create.cshtml", loai);
         }
 
         // GET: LoaiSanPham/Edit/5
@@ -65,7 +65,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
             var loai = await _context.LoaiSanPhams.FindAsync(id);
             if (loai == null) return NotFound();
 
-            return View(loai);
+            return View("~/Views/Admin/LoaiSanPham/Edit.cshtml", loai);
         }
 
         // POST: LoaiSanPham/Edit/5
@@ -91,7 +91,7 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(loai);
+            return View("~/Views/Admin/LoaiSanPham/Edit.cshtml", loai);
         }
     }
 }

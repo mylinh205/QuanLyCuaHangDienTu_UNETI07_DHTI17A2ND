@@ -1,0 +1,65 @@
+﻿@model IEnumerable<QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models.DonHang>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4 text-primary fw-bold"><i class="bi bi-receipt"></i> Quản lý đơn hàng toàn hệ thống</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Bộ lọc trạng thái -->
+    <div class="mb-3">
+        <span class="fw-bold me-2">Lọc trạng thái:</span>
+        <a asp-action="QuanLyDonHang" class="btn btn-sm @(string.IsNullOrEmpty(ViewBag.TrangThaiHienTai) ? "btn-dark" : "btn-outline-dark")">Tất cả</a>
+        <a asp-action="QuanLyDonHang" asp-route-trangThai="Chờ xác nhận" class="btn btn-sm @(ViewBag.TrangThaiHienTai == "Chờ xác nhận" ? "btn-warning" : "btn-outline-warning")">Chờ xác nhận</a>
+        <a asp-action="QuanLyDonHang" asp-route-trangThai="Đang giao" class="btn btn-sm @(ViewBag.TrangThaiHienTai == "Đang giao" ? "btn-info" : "btn-outline-info")">Đang giao</a>
+        <a asp-action="QuanLyDonHang" asp-route-trangThai="Đã hoàn thành" class="btn btn-sm @(ViewBag.TrangThaiHienTai == "Đã hoàn thành" ? "btn-success" : "btn-outline-success")">Đã hoàn thành</a>
+        <a asp-action="QuanLyDonHang" asp-route-trangThai="Đã hủy" class="btn btn-sm @(ViewBag.TrangThaiHienTai == "Đã hủy" ? "btn-danger" : "btn-outline-danger")">Đã hủy</a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">#@item.MaDonHang</td>
+                                <td>@item.KhachHang?.HoTen</td>
+                                <td>@item.NgayDat.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-danger fw-bold">@item.TongTien.ToString("N0") VNĐ</td>
+                                <td>
+                                    <span class="badge @(item.TrangThai == "Chờ xác nhận" ? "bg-warning text-dark" : item.TrangThai == "Đang giao" ? "bg-info" : item.TrangThai == "Đã hoàn thành" ? "bg-success" : "bg-danger")">
+                                        @item.TrangThai
+                                    </span>
+                                </td>
+                                <td>
+                                    <a asp-action="ChiTietDonHang" asp-route-id="@item.MaDonHang" class="btn btn-sm btn-primary"><i class="bi bi-eye"></i> Chi tiết</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

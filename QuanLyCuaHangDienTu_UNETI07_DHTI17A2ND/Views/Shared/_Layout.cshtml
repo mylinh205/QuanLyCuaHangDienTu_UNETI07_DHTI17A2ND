@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     var vaiTro = Context.Session.GetString("VaiTro");
     var maTaiKhoan = Context.Session.GetInt32("MaTaiKhoan");
     var hoTen = Context.Session.GetString("HoTen");
@@ -8,72 +7,107 @@
     bool isAdmin = daDangNhap && vaiTro == "Admin";
     bool isKhachHang = daDangNhap && vaiTro == "KhachHang";
 }
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>
-        @ViewData["Title"] - Quản lý cửa hàng điện tử
-    </title>
+    <title>@ViewData["Title"] - Quản lý cửa hàng điện tử</title>
 
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <link rel="stylesheet"
-          href="~/QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.styles.css"
-          asp-append-version="true" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.styles.css" asp-append-version="true" />
+
+    <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                background-color: #f4f6f9;
+                color: #333;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            main {
+                flex: 1;
+            }
+            .navbar {
+                background-color: #ffffff !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,.04);
+            }
+            .navbar-brand {
+                font-weight: 700;
+                color: #0d6efd !important;
+                letter-spacing: -0.5px;
+            }
+            .nav-link {
+                font-weight: 500;
+                color: #495057 !important;
+                transition: color 0.2s ease;
+                padding: 0.5rem 0.75rem !important;
+            }
+            .nav-link:hover, .nav-link.active {
+                color: #0d6efd !important;
+            }
+            .card {
+                border: none;
+                border-radius: 12px;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+                transition: all 0.2s ease-in-out;
+            }
+            .card:hover {
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            }
+            .btn {
+                border-radius: 8px;
+                font-weight: 500;
+            }
+            footer {
+                background-color: #ffffff;
+                border-top: 1px solid #dee2e6;
+                padding: 1.5rem 0;
+                margin-top: 3rem;
+                color: #6c757d;
+            }
+    </style>
 </head>
-
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-3">
-            <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-light border-bottom sticky-top mb-3">
+            <div class="container-fluid px-4">
 
-                <a class="navbar-brand fw-bold"
-                   asp-controller="Home"
-                   asp-action="Index">
-                    Cửa hàng điện tử
+                <a class="navbar-brand fs-5" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-cpu-fill text-primary"></i> Cửa Hàng Điện Tử UNETI
                 </a>
 
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#mainNavbar"
-                        aria-controls="mainNavbar"
-                        aria-expanded="false"
-                        aria-label="Mở menu">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Mở menu">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse"
-                     id="mainNavbar">
+                <div class="collapse navbar-collapse" id="mainNavbar">
 
                     <!-- MENU CHÍNH -->
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                         <!-- Trang chủ -->
                         <li class="nav-item">
-                            <a class="nav-link"
-                               asp-controller="Home"
-                               asp-action="Index">
-                                Trang chủ
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door"></i> Trang chủ
                             </a>
                         </li>
 
                         <!-- Sản phẩm -->
                         <li class="nav-item">
-                            <a class="nav-link"
-                               asp-controller="SanPham"
-                               asp-action="Index">
-                                Sản phẩm
+                            <a class="nav-link" asp-controller="SanPham" asp-action="Index">
+                                <i class="bi bi-box-seam"></i> Sản phẩm
                             </a>
                         </li>
 
@@ -81,26 +115,20 @@
                         {
                             <!-- MENU ADMIN -->
                             <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="Admin"
-                                   asp-action="Dashboard">
-                                    Dashboard
+                                <a class="nav-link text-primary fw-semibold" asp-controller="Admin" asp-action="Dashboard">
+                                    <i class="bi bi-speedometer2"></i> Dashboard
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="LoaiSanPham"
-                                   asp-action="Index">
-                                    Loại sản phẩm
+                                <a class="nav-link" asp-controller="LoaiSanPham" asp-action="Index">
+                                    <i class="bi bi-tags"></i> Loại sản phẩm
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="KhachHang"
-                                   asp-action="Index">
-                                    Quản lý khách hàng
+                                <a class="nav-link" asp-controller="KhachHang" asp-action="Index">
+                                    <i class="bi bi-people"></i> Khách hàng
                                 </a>
                             </li>
                         }
@@ -108,70 +136,56 @@
                         {
                             <!-- MENU KHÁCH HÀNG -->
                             <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="KhachHang"
-                                   asp-action="Profile">
-                                    Hồ sơ khách hàng
+                                <a class="nav-link" asp-controller="KhachHang" asp-action="Profile">
+                                    <i class="bi bi-person-badge"></i> Hồ sơ khách hàng
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="DatHang"
-                                   asp-action="Index">
-                                    Đơn hàng của tôi
+                                <a class="nav-link" asp-controller="DatHang" asp-action="Index">
+                                    <i class="bi bi-bag-check"></i> Đơn hàng của tôi
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="DatHang"
-                                   asp-action="History">
-                                    Lịch sử mua hàng
+                                <a class="nav-link" asp-controller="DatHang" asp-action="History">
+                                    <i class="bi bi-clock-history"></i> Lịch sử mua hàng
                                 </a>
                             </li>
                         }
                     </ul>
 
                     <!-- MENU TÀI KHOẢN -->
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-center">
 
                         @if (daDangNhap)
                         {
-                            <li class="nav-item">
+                            <li class="nav-item me-3">
                                 <span class="nav-link text-dark">
-                                    Xin chào,
+                                    <i class="bi bi-person-circle text-primary"></i> Xin chào,
                                     <strong>
-                                        @(string.IsNullOrWhiteSpace(hoTen)
-                                            ? "Người dùng"
-                                            : hoTen)
+                                        @(string.IsNullOrWhiteSpace(hoTen) ? "Người dùng" : hoTen)
                                     </strong>
                                 </span>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link text-danger"
-                                   asp-controller="Account"
-                                   asp-action="Logout">
-                                    Đăng xuất
+                                <a class="btn btn-outline-danger btn-sm px-3" asp-controller="Account" asp-action="Logout">
+                                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
                                 </a>
                             </li>
                         }
                         else
                         {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="Account"
-                                   asp-action="Login">
-                                    Đăng nhập
+                            <li class="nav-item me-2">
+                                <a class="btn btn-outline-primary btn-sm px-3" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
                                 </a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="Account"
-                                   asp-action="Register">
-                                    Đăng ký
+                                <a class="btn btn-primary btn-sm px-3" asp-controller="Account" asp-action="Register">
+                                    <i class="bi bi-person-plus"></i> Đăng ký
                                 </a>
                             </li>
                         }
@@ -183,30 +197,26 @@
     </header>
 
     <!-- NỘI DUNG TRANG -->
-    <div class="container">
-        <main role="main" class="pb-3">
+    <div class="container pb-4">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
     <!-- FOOTER -->
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Quản lý cửa hàng điện tử UNETI -
-            <a asp-controller="Home"
-               asp-action="Privacy">
-                Chính sách
+    <footer>
+        <div class="container text-center">
+            <p class="mb-1 fw-semibold">&copy; 2026 - Quản lý cửa hàng điện tử UNETI (Nhóm UNETI07_DHTI17A2ND)</p>
+            <a class="text-decoration-none small text-muted" asp-controller="Home" asp-action="Privacy">
+                Chính sách bảo mật
             </a>
         </div>
     </footer>
 
     <!-- JAVASCRIPT -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script src="~/js/site.js"
-            asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

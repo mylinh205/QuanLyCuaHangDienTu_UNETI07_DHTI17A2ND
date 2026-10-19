@@ -1,6 +1,6 @@
-﻿// Họ và tên: [Họ và tên của bạn]
-// Mã sinh viên: [Mã sinh viên của bạn]
-// Nội dung thực hiện: Module 2 - ViewModel phục vụ Tìm kiếm, Lọc, Sắp xếp, Phân trang Sản phẩm
+﻿// Họ và tên: [Nguyễn Văn Dũng ]
+// Mã sinh viên: [23203100024]
+// Nội dung thực hiện: Module 2 - Quản lý sản phẩm, Tìm kiếm, Lọc, Sắp xếp và Phân trang dữ liệu
 using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Models;
 
 namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels
