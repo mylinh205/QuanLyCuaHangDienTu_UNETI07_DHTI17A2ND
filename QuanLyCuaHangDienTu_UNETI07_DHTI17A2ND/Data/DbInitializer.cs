@@ -12,35 +12,44 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
     {
         public static void Initialize(ApplicationDbContext context)
         {
-            // Chỉ dùng EnsureCreated khi dự án không sử dụng Migrations.
-            // Nếu database đã tồn tại, lệnh này không cập nhật cấu trúc bảng.
+            // Chỉ dùng EnsureCreated nếu không dùng Migrations.
             context.Database.EnsureCreated();
 
-            // =====================================
-            // 1. TẠO TÀI KHOẢN ADMIN
-            // =====================================
-            if (!context.TaiKhoans.Any(
+            SeedAdmin(context);
+            SeedProducts(context);
+            SeedModule3(context);
+        }
+
+        // =====================================
+        // 1. TẠO TÀI KHOẢN ADMIN
+        // =====================================
+        private static void SeedAdmin(ApplicationDbContext context)
+        {
+            if (context.TaiKhoans.Any(
                 x => x.TenDangNhap == "admin"))
+                return;
+
+            var admin = new TaiKhoan
             {
-                var admin = new TaiKhoan
-                {
-                    TenDangNhap = "admin",
-                    HoTen = "Quản trị viên",
-                    Email = "admin@uneti.local",
-                    VaiTro = "Admin",
-                    TrangThai = true
-                };
+                TenDangNhap = "admin",
+                HoTen = "Quản trị viên",
+                Email = "admin@uneti.local",
+                VaiTro = "Admin",
+                TrangThai = true
+            };
 
-                admin.MatKhau = new PasswordHasher<TaiKhoan>()
-                    .HashPassword(admin, "Admin@123");
+            admin.MatKhau = new PasswordHasher<TaiKhoan>()
+                .HashPassword(admin, "Admin@123");
 
-                context.TaiKhoans.Add(admin);
-                context.SaveChanges();
-            }
+            context.TaiKhoans.Add(admin);
+            context.SaveChanges();
+        }
 
-            // =====================================
-            // 2. DỮ LIỆU MẪU SẢN PHẨM
-            // =====================================
+        // =====================================
+        // 2. TẠO DANH MỤC VÀ 100 SẢN PHẨM
+        // =====================================
+        private static void SeedProducts(ApplicationDbContext context)
+        {
             var productGroups = new[]
             {
                 new ProductGroup(
@@ -214,36 +223,27 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                     })
             };
 
-            // =====================================
-            // 3. TẠO LOẠI SẢN PHẨM
-            // =====================================
             var categories = context.LoaiSanPhams.ToList();
 
             foreach (var group in productGroups)
             {
-                bool exists = categories.Any(
-                    x => x.TenLoai == group.Category);
+                if (categories.Any(x => x.TenLoai == group.Category))
+                    continue;
 
-                if (!exists)
+                var category = new LoaiSanPham
                 {
-                    var category = new LoaiSanPham
-                    {
-                        TenLoai = group.Category,
-                        TrangThai = true
-                    };
+                    TenLoai = group.Category,
+                    TrangThai = true
+                };
 
-                    context.LoaiSanPhams.Add(category);
-                    categories.Add(category);
-                }
+                context.LoaiSanPhams.Add(category);
+                categories.Add(category);
             }
 
             context.SaveChanges();
 
-            // =====================================
-            // 4. TẠO SẢN PHẨM MẪU
-            // =====================================
-            // Giữ nguyên cách seed ban đầu:
-            // Nếu đã có sản phẩm, không thêm lại.
+            // Giữ cách hoạt động cũ:
+            // Nếu đã có sản phẩm, không thêm 100 sản phẩm nữa.
             if (context.SanPhams.Any())
                 return;
 
@@ -251,7 +251,6 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                 .ToDictionary(x => x.TenLoai);
 
             var products = new List<SanPham>();
-
             int productIndex = 0;
 
             foreach (var group in productGroups)
@@ -277,25 +276,21 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
                         status = "Đang kinh doanh";
                     }
 
-                    var product = new SanPham
+                    products.Add(new SanPham
                     {
                         TenSanPham = group.Names[i],
-                        MaLoai = categoryByName[
-                            group.Category].MaLoai,
+                        MaLoai = categoryByName[group.Category].MaLoai,
                         ThuongHieu = group.Brand,
                         DonGia = group.StartingPrice +
                                  group.PriceStep * i,
-                        SoLuongTon = 5 +
-                            (productIndex * 7 % 36),
-                        ThoiGianBaoHanh =
-                            group.WarrantyMonths,
-                        MoTa = $"{group.Category} " +
-                               $"{group.Brand} chính hãng, " +
-                               $"bảo hành {group.WarrantyMonths} tháng.",
+                        SoLuongTon = 5 + (productIndex * 7 % 36),
+                        ThoiGianBaoHanh = group.WarrantyMonths,
+                        MoTa = $"{group.Category} {group.Brand} " +
+                               $"chính hãng, bảo hành " +
+                               $"{group.WarrantyMonths} tháng.",
                         TrangThai = status
-                    };
+                    });
 
-                    products.Add(product);
                     productIndex++;
                 }
             }
@@ -305,7 +300,180 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
         }
 
         // =====================================
-        // 5. LỚP LƯU DỮ LIỆU NHÓM
+        // 3. MODULE 3 - QUẢN LÝ KHÁCH HÀNG
+        // =====================================
+        private static void SeedModule3(ApplicationDbContext context)
+        {
+            // Dữ liệu dùng cho học tập/thử nghiệm.
+            // Email và tên đăng nhập được thay bằng dữ liệu demo.
+            var customers = new[]
+            {
+                new CustomerSeed(
+                    "khachhang_demo01",
+                    "Phạm Thành",
+                    "thanh.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo02",
+                    "Đào Minh Long",
+                    "long.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo1",
+                    "Khách hàng mẫu 1",
+                    "khachhang1@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo2",
+                    "Khách hàng mẫu 2",
+                    "khachhang2@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo3",
+                    "Nguyễn Văn Dũng",
+                    "dung.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo4",
+                    "Vũ Thành Đạt",
+                    "dat.demo@example.com"),
+
+                new CustomerSeed(
+                    "khachhang_demo5",
+                    "Nguyễn Văn An",
+                    "an.demo@example.com")
+            };
+
+            var hasher = new PasswordHasher<TaiKhoan>();
+
+            // =====================================
+            // 3.1. TẠO TÀI KHOẢN VÀ KHÁCH HÀNG
+            // =====================================
+            foreach (var item in customers)
+            {
+                // Ưu tiên tìm khách hàng đã tồn tại
+                // theo email demo hoặc họ tên.
+                // Kiểm tra họ tên chỉ phù hợp với bộ
+                // dữ liệu mẫu này, không dùng làm khóa
+                // định danh trong hệ thống thực tế.
+                var existingCustomer = context.KhachHangs
+                    .FirstOrDefault(x =>
+                        x.Email == item.Email ||
+                        x.HoTen == item.Name);
+
+                // Nếu khách hàng đã tồn tại,
+                // giữ nguyên dữ liệu và tài khoản cũ.
+                if (existingCustomer != null)
+                    continue;
+
+                var account = context.TaiKhoans
+                    .FirstOrDefault(x =>
+                        x.TenDangNhap == item.Username);
+
+                if (account == null)
+                {
+                    account = new TaiKhoan
+                    {
+                        TenDangNhap = item.Username,
+                        HoTen = item.Name,
+                        Email = item.Email,
+                        VaiTro = "KhachHang",
+                        TrangThai = true
+                    };
+
+                    account.MatKhau = hasher.HashPassword(
+                        account, "Demo@12345");
+
+                    context.TaiKhoans.Add(account);
+                    context.SaveChanges();
+                }
+
+                // Không tạo khách hàng thứ hai cho
+                // cùng một tài khoản.
+                if (context.KhachHangs.Any(
+                    x => x.MaTaiKhoan == account.MaTaiKhoan))
+                    continue;
+
+                context.KhachHangs.Add(new KhachHang
+                {
+                    MaTaiKhoan = account.MaTaiKhoan,
+                    HoTen = item.Name,
+                    Email = item.Email,
+                    NgayDangKy = DateTime.Now,
+                    TrangThai = true
+                });
+
+                context.SaveChanges();
+            }
+
+            // =====================================
+            // 3.2. TẠO 2 ĐƠN HÀNG VÀ CHI TIẾT
+            // =====================================
+            var demoOrders = new[]
+            {
+                new OrderSeed(
+                    "Khách hàng mẫu 1",
+                    "WH-1000XM5 chống ồn",
+                    "Địa chỉ giao hàng mẫu 1"),
+
+                new OrderSeed(
+                    "Khách hàng mẫu 2",
+                    "WF-C700N chống ồn",
+                    "Địa chỉ giao hàng mẫu 2")
+            };
+
+            foreach (var item in demoOrders)
+            {
+                var customer = context.KhachHangs
+                    .FirstOrDefault(x => x.HoTen == item.CustomerName);
+
+                if (customer == null)
+                    continue;
+
+                var product = context.SanPhams
+                    .FirstOrDefault(x =>
+                        x.TenSanPham == item.ProductName);
+
+                if (product == null)
+                    continue;
+
+                // Không tạo đơn demo trùng.
+                bool orderExists = context.DonHangs.Any(x =>
+                    x.MaKhachHang == customer.MaKhachHang &&
+                    x.DiaChiGiaoHang == item.Address);
+
+                if (orderExists)
+                    continue;
+
+                decimal price = product.DonGia;
+
+                var order = new DonHang
+                {
+                    MaKhachHang = customer.MaKhachHang,
+                    NgayDat = DateTime.Now,
+                    DiaChiGiaoHang = item.Address,
+                    TongTien = price,
+                    TrangThai = "Chờ xác nhận",
+
+                    ChiTietDonHangs = new List<ChiTietDonHang>
+                    {
+                        new ChiTietDonHang
+                        {
+                            MaSanPham = product.MaSanPham,
+                            SoLuong = 1,
+                            DonGia = price,
+                            ThanhTien = price
+                        }
+                    }
+                };
+
+                context.DonHangs.Add(order);
+                context.SaveChanges();
+            }
+        }
+
+        // =====================================
+        // 4. CÁC LỚP LƯU DỮ LIỆU MẪU
         // =====================================
         private sealed record ProductGroup(
             string Category,
@@ -314,5 +482,15 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data
             decimal PriceStep,
             int WarrantyMonths,
             string[] Names);
+
+        private sealed record CustomerSeed(
+            string Username,
+            string Name,
+            string Email);
+
+        private sealed record OrderSeed(
+            string CustomerName,
+            string ProductName,
+            string Address);
     }
 }
