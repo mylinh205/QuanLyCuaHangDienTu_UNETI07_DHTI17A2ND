@@ -1,3 +1,4 @@
+
 @model QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Trang quản trị (Dashboard)";
@@ -5,7 +6,10 @@
 }
 
 <div class="container-fluid px-4 py-4">
-    <h2 class="mb-4 fw-bold text-primary"><i class="bi bi-speedometer2"></i> Bảng điều khiển Quản trị (Dashboard)</h2>
+    <h2 class="mb-4 fw-bold text-primary">
+        <i class="bi bi-speedometer2"></i>
+        Bảng điều khiển Quản trị (Dashboard)
+    </h2>
 
     <div class="row g-4 mb-4">
         <div class="col-xl-3 col-md-6">
@@ -13,10 +17,16 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <div class="text-xs fw-bold text-uppercase mb-1">Tổng sản phẩm</div>
-                            <div class="h5 mb-0 fw-bold">@Model.TongSanPham</div>
+                            <div class="text-xs fw-bold text-uppercase mb-1">
+                                Tổng sản phẩm
+                            </div>
+                            <div class="h5 mb-0 fw-bold">
+                                @Model.TongSanPham
+                            </div>
                         </div>
-                        <div class="col-auto"><i class="bi bi-box-seam fs-1 text-white-50"></i></div>
+                        <div class="col-auto">
+                            <i class="bi bi-box-seam fs-1 text-white-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -27,10 +37,16 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <div class="text-xs fw-bold text-uppercase mb-1">Tổng đơn hàng</div>
-                            <div class="h5 mb-0 fw-bold">@Model.TongDonHang</div>
+                            <div class="text-xs fw-bold text-uppercase mb-1">
+                                Tổng đơn hàng
+                            </div>
+                            <div class="h5 mb-0 fw-bold">
+                                @Model.TongDonHang
+                            </div>
                         </div>
-                        <div class="col-auto"><i class="bi bi-receipt fs-1 text-white-50"></i></div>
+                        <div class="col-auto">
+                            <i class="bi bi-receipt fs-1 text-white-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -41,10 +57,16 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <div class="text-xs fw-bold text-uppercase mb-1">Đơn chờ xác nhận</div>
-                            <div class="h5 mb-0 fw-bold">@Model.DonHangChoXacNhan</div>
+                            <div class="text-xs fw-bold text-uppercase mb-1">
+                                Đơn chờ xác nhận
+                            </div>
+                            <div class="h5 mb-0 fw-bold">
+                                @Model.DonHangChoXacNhan
+                            </div>
                         </div>
-                        <div class="col-auto"><i class="bi bi-hourglass-split fs-1 text-dark-50"></i></div>
+                        <div class="col-auto">
+                            <i class="bi bi-hourglass-split fs-1 text-dark-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -55,25 +77,59 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col">
-                            <div class="text-xs fw-bold text-uppercase mb-1">Khách hàng</div>
-                            <div class="h5 mb-0 fw-bold">@Model.TongKhachHang</div>
+                            <div class="text-xs fw-bold text-uppercase mb-1">
+                                Khách hàng
+                            </div>
+                            <div class="h5 mb-0 fw-bold">
+                                @Model.TongKhachHang
+                            </div>
                         </div>
-                        <div class="col-auto"><i class="bi bi-people fs-1 text-white-50"></i></div>
+                        <div class="col-auto">
+                            <i class="bi bi-people fs-1 text-white-50"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions / Navigation -->
+    <!-- Thao tác quản lý nhanh -->
     <div class="row g-4">
         <div class="col-md-6">
             <div class="card shadow">
-                <div class="card-header bg-dark text-white fw-bold">Thao tác quản lý nhanh</div>
+                <div class="card-header bg-dark text-white fw-bold">
+                    Thao tác quản lý nhanh
+                </div>
+
                 <div class="card-body">
-                    <a asp-action="QuanLyDonHang" class="btn btn-outline-primary mb-2 me-2"><i class="bi bi-list-check"></i> Quản lý toàn bộ đơn hàng</a>
-                    <a asp-action="ThongKe" class="btn btn-outline-success mb-2 me-2"><i class="bi bi-bar-chart-line"></i> Xem báo cáo thống kê doanh thu</a>
-                    <a asp-controller="SanPham" asp-action="Index" class="btn btn-outline-secondary mb-2 me-2"><i class="bi bi-box"></i> Quản lý danh mục sản phẩm</a>
+                    <a asp-controller="Admin"
+                       asp-action="QuanLyDonHang"
+                       class="btn btn-outline-primary mb-2 me-2">
+                        <i class="bi bi-list-check"></i>
+                        Quản lý toàn bộ đơn hàng
+                    </a>
+
+                    <a asp-controller="Admin"
+                       asp-action="ThongKe"
+                       class="btn btn-outline-success mb-2 me-2">
+                        <i class="bi bi-bar-chart-line"></i>
+                        Xem báo cáo thống kê doanh thu
+                    </a>
+
+                    <a asp-controller="SanPham"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary mb-2 me-2">
+                        <i class="bi bi-box"></i>
+                        Quản lý danh mục sản phẩm
+                    </a>
+
+                    <!-- Khôi phục chức năng quản lý khách hàng -->
+                    <a asp-controller="Admin"
+                       asp-action="Customers"
+                       class="btn btn-outline-info mb-2 me-2">
+                        <i class="bi bi-people-fill"></i>
+                        Quản lý khách hàng
+                    </a>
                 </div>
             </div>
         </div>

@@ -1,6 +1,14 @@
+
 // Họ và tên: Vũ Thành Đạt
 // Mã sinh viên: 23203100069
-// Nội dung thực hiện: Module 4 - Quản lý đơn hàng, Xử lý trạng thái, Dashboard và Thống kê
+// Nội dung thực hiện: Module 4 - Quản lý đơn hàng,
+// Xử lý trạng thái, Dashboard, Thống kê
+// Tích hợp chức năng Quản lý khách hàng
+
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Data;
@@ -17,115 +25,239 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
             _context = context;
         }
 
-        // Kiểm tra quyền Admin qua Session
+        // ============================================
+        // KIỂM TRA QUYỀN ADMIN
+        // ============================================
         private bool CheckAdmin()
         {
             return HttpContext.Session.GetString("VaiTro") == "Admin";
         }
 
-        // ================= 1. DASHBOARD QUẢN TRỊ =================
+        // ============================================
+        // 1. DASHBOARD QUẢN TRỊ
+        // GET: /Admin/Dashboard
+        // ============================================
         public async Task<IActionResult> Dashboard()
         {
-            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+            if (!CheckAdmin())
+                return RedirectToAction("Login", "Account");
 
             var model = new DashboardViewModel
             {
-                TongLoaiSanPham = await _context.LoaiSanPhams.CountAsync(),
-                TongSanPham = await _context.SanPhams.CountAsync(),
-                TongKhachHang = await _context.KhachHangs.CountAsync(),
-                TongDonHang = await _context.DonHangs.CountAsync(),
-                DonHangChoXacNhan = await _context.DonHangs.CountAsync(d => d.TrangThai == "Chờ xác nhận"),
-                DonHangDangGiao = await _context.DonHangs.CountAsync(d => d.TrangThai == "Đang giao"),
-                DonHangDaHoanThanh = await _context.DonHangs.CountAsync(d => d.TrangThai == "Đã hoàn thành"),
-                SanPhamDangKinhDoanh = await _context.SanPhams.CountAsync(s => s.TrangThai == "Đang kinh doanh")
+                TongLoaiSanPham =
+                    await _context.LoaiSanPhams.CountAsync(),
+
+                TongSanPham =
+                    await _context.SanPhams.CountAsync(),
+
+                TongKhachHang =
+                    await _context.KhachHangs.CountAsync(),
+
+                TongDonHang =
+                    await _context.DonHangs.CountAsync(),
+
+                DonHangChoXacNhan =
+                    await _context.DonHangs.CountAsync(
+                        d => d.TrangThai == "Chờ xác nhận"),
+
+                DonHangDangGiao =
+                    await _context.DonHangs.CountAsync(
+                        d => d.TrangThai == "Đang giao"),
+
+                DonHangDaHoanThanh =
+                    await _context.DonHangs.CountAsync(
+                        d => d.TrangThai == "Đã hoàn thành"),
+
+                SanPhamDangKinhDoanh =
+                    await _context.SanPhams.CountAsync(
+                        s => s.TrangThai == "Đang kinh doanh")
             };
 
             return View(model);
         }
 
-        // ================= 2. QUẢN LÝ ĐƠN HÀNG =================
-        // GET: Admin/QuanLyDonHang
-        public async Task<IActionResult> QuanLyDonHang(string? trangThai)
+        // ============================================
+        // 2. QUẢN LÝ TOÀN BỘ ĐƠN HÀNG
+        // GET: /Admin/QuanLyDonHang
+        // ============================================
+        public async Task<IActionResult> QuanLyDonHang(
+            string? trangThai)
         {
-            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+            if (!CheckAdmin())
+                return RedirectToAction("Login", "Account");
 
             var query = _context.DonHangs
                 .Include(d => d.KhachHang)
                 .AsQueryable();
 
-            if (!string.IsNullOrEmpty(trangThai))
+            if (!string.IsNullOrWhiteSpace(trangThai))
             {
-                query = query.Where(d => d.TrangThai == trangThai);
+                query = query.Where(
+                    d => d.TrangThai == trangThai);
             }
 
-            var danhSachDonHang = await query.OrderByDescending(d => d.NgayDat).ToListAsync();
+            var danhSachDonHang = await query
+                .OrderByDescending(d => d.NgayDat)
+                .ToListAsync();
+
             ViewBag.TrangThaiHienTai = trangThai;
+
             return View(danhSachDonHang);
         }
 
-        // GET: Admin/ChiTietDonHang/5
+        // ============================================
+        // 3. CHI TIẾT ĐƠN HÀNG
+        // GET: /Admin/ChiTietDonHang/5
+        // ============================================
         public async Task<IActionResult> ChiTietDonHang(int? id)
         {
-            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
-            if (id == null) return NotFound();
+            if (!CheckAdmin())
+                return RedirectToAction("Login", "Account");
+
+            if (id == null)
+                return NotFound();
 
             var donHang = await _context.DonHangs
                 .Include(d => d.KhachHang)
                 .Include(d => d.ChiTietDonHangs)
                     .ThenInclude(c => c.SanPham)
-                .FirstOrDefaultAsync(m => m.MaDonHang == id);
+                .FirstOrDefaultAsync(
+                    d => d.MaDonHang == id);
 
-            if (donHang == null) return NotFound();
+            if (donHang == null)
+                return NotFound();
 
             return View(donHang);
         }
 
-        // POST: Admin/CapNhatTrangThai
+        // ============================================
+        // 4. CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
+        // POST: /Admin/CapNhatTrangThai
+        // ============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CapNhatTrangThai(int maDonHang, string trangThaiMoi)
+        public async Task<IActionResult> CapNhatTrangThai(
+            int maDonHang,
+            string trangThaiMoi)
         {
-            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+            if (!CheckAdmin())
+                return RedirectToAction("Login", "Account");
 
             var donHang = await _context.DonHangs
                 .Include(d => d.ChiTietDonHangs)
                     .ThenInclude(c => c.SanPham)
-                .FirstOrDefaultAsync(d => d.MaDonHang == maDonHang);
+                .FirstOrDefaultAsync(
+                    d => d.MaDonHang == maDonHang);
 
-            if (donHang == null) return NotFound();
+            if (donHang == null)
+                return NotFound();
 
             string trangThaiCu = donHang.TrangThai;
 
-            // 1. Nghiệp vụ: Chặn không cho chuyển ngược từ "Đã hoàn thành" về "Chờ xác nhận"
-            if (trangThaiCu == "Đã hoàn thành" && trangThaiMoi == "Chờ xác nhận")
+            // Các trạng thái được phép sử dụng
+            var trangThaiHopLe = new[]
             {
-                TempData["Error"] = "Đơn hàng đã hoàn thành không được phép chuyển ngược về chờ xác nhận!";
-                return RedirectToAction(nameof(ChiTietDonHang), new { id = maDonHang });
+                "Chờ xác nhận",
+                "Đã xác nhận",
+                "Đang giao",
+                "Đã hoàn thành",
+                "Đã hủy"
+            };
+
+            if (string.IsNullOrWhiteSpace(trangThaiMoi) ||
+                !trangThaiHopLe.Contains(trangThaiMoi))
+            {
+                TempData["Error"] =
+                    "Trạng thái đơn hàng không hợp lệ.";
+
+                return RedirectToAction(
+                    nameof(ChiTietDonHang),
+                    new { id = maDonHang });
             }
 
-            // 2. Nghiệp vụ kiểm tra tồn kho & Trừ kho khi chuyển từ "Chờ xác nhận" sang "Đã xác nhận"
-            if (trangThaiCu == "Chờ xác nhận" && trangThaiMoi == "Đã xác nhận")
+            if (trangThaiCu == trangThaiMoi)
+            {
+                TempData["Error"] =
+                    "Đơn hàng đã ở trạng thái này.";
+
+                return RedirectToAction(
+                    nameof(ChiTietDonHang),
+                    new { id = maDonHang });
+            }
+
+            // Chặn thay đổi đơn đã hoàn thành hoặc đã hủy
+            if (trangThaiCu == "Đã hoàn thành" ||
+                trangThaiCu == "Đã hủy")
+            {
+                TempData["Error"] =
+                    "Không thể thay đổi trạng thái đơn hàng " +
+                    "đã hoàn thành hoặc đã hủy.";
+
+                return RedirectToAction(
+                    nameof(ChiTietDonHang),
+                    new { id = maDonHang });
+            }
+
+            // Kiểm tra chuyển trạng thái hợp lệ
+            bool chuyenHopLe =
+                (trangThaiCu == "Chờ xác nhận" &&
+                 (trangThaiMoi == "Đã xác nhận" ||
+                  trangThaiMoi == "Đã hủy")) ||
+
+                (trangThaiCu == "Đã xác nhận" &&
+                 (trangThaiMoi == "Đang giao" ||
+                  trangThaiMoi == "Đã hủy")) ||
+
+                (trangThaiCu == "Đang giao" &&
+                 (trangThaiMoi == "Đã hoàn thành" ||
+                  trangThaiMoi == "Đã hủy"));
+
+            if (!chuyenHopLe)
+            {
+                TempData["Error"] =
+                    "Không thể chuyển từ trạng thái '" +
+                    trangThaiCu + "' sang '" +
+                    trangThaiMoi + "'.";
+
+                return RedirectToAction(
+                    nameof(ChiTietDonHang),
+                    new { id = maDonHang });
+            }
+
+            // Trừ kho khi xác nhận đơn hàng
+            if (trangThaiCu == "Chờ xác nhận" &&
+                trangThaiMoi == "Đã xác nhận")
             {
                 foreach (var item in donHang.ChiTietDonHangs)
                 {
                     var sp = item.SanPham;
-                    if (sp == null || sp.SoLuongTon < item.SoLuong)
+
+                    if (sp == null ||
+                        sp.SoLuongTon < item.SoLuong)
                     {
-                        TempData["Error"] = $"Sản phẩm '{sp?.TenSanPham ?? "Không xác định"}' không đủ số lượng tồn kho (Còn lại: {sp?.SoLuongTon ?? 0}, Cần: {item.SoLuong}). Không thể xác nhận đơn hàng!";
-                        return RedirectToAction(nameof(ChiTietDonHang), new { id = maDonHang });
+                        TempData["Error"] =
+                            $"Sản phẩm '{sp?.TenSanPham ?? "Không xác định"}' " +
+                            "không đủ số lượng tồn kho.";
+
+                        return RedirectToAction(
+                            nameof(ChiTietDonHang),
+                            new { id = maDonHang });
                     }
                 }
 
-                // Đủ hàng -> Tiến hành trừ số lượng tồn kho
                 foreach (var item in donHang.ChiTietDonHangs)
                 {
-                    item.SanPham.SoLuongTon -= item.SoLuong;
-                    if (item.SanPham.SoLuongTon < 0) item.SanPham.SoLuongTon = 0; // Ràng buộc SoLuongTon >= 0
+                    if (item.SanPham != null)
+                    {
+                        item.SanPham.SoLuongTon -= item.SoLuong;
+                    }
                 }
             }
 
-            // 3. Nghiệp vụ: Nếu hủy đơn mà trước đó đã trừ kho (ví dụ từ Đã xác nhận / Đang giao -> Đã hủy), hoàn lại số lượng tồn kho
-            if (trangThaiMoi == "Đã hủy" && (trangThaiCu == "Đã xác nhận" || trangThaiCu == "Đang giao"))
+            // Hoàn kho nếu hủy đơn đã xác nhận/đang giao
+            if (trangThaiMoi == "Đã hủy" &&
+                (trangThaiCu == "Đã xác nhận" ||
+                 trangThaiCu == "Đang giao"))
             {
                 foreach (var item in donHang.ChiTietDonHangs)
                 {
@@ -137,78 +269,193 @@ namespace QuanLyCuaHangDienTu_UNETI07_DHTI17A2ND.Controllers
             }
 
             donHang.TrangThai = trangThaiMoi;
+
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"Đã cập nhật trạng thái đơn hàng #{maDonHang} thành '{trangThaiMoi}' thành công!";
-            return RedirectToAction(nameof(ChiTietDonHang), new { id = maDonHang });
+            TempData["Success"] =
+                $"Đã cập nhật đơn hàng #{maDonHang} " +
+                $"thành '{trangThaiMoi}' thành công!";
+
+            return RedirectToAction(
+                nameof(ChiTietDonHang),
+                new { id = maDonHang });
         }
 
-        // ================= 3. THỐNG KÊ DỮ LIỆU & BÁO CÁO LINQ =================
-        // ================= 3. THỐNG KÊ DỮ LIỆU & BÁO CÁO LINQ =================
+        // ============================================
+        // 5. THỐNG KÊ DỮ LIỆU VÀ DOANH THU
+        // GET: /Admin/ThongKe
+        // ============================================
         public async Task<IActionResult> ThongKe()
         {
-            if (!CheckAdmin()) return RedirectToAction("Login", "Account");
+            if (!CheckAdmin())
+                return RedirectToAction("Login", "Account");
 
             var viewModel = new ThongKeViewModel();
 
-            // 1. Thống kê số lượng sản phẩm theo từng loại (GROUP BY, Count)
-            viewModel.SanPhamTheoLoai = await _context.SanPhams
-                .GroupBy(s => s.LoaiSanPham!.TenLoai)
-                .Select(g => new SanPhamTheoLoaiDto
+            // Thống kê sản phẩm theo loại
+            viewModel.SanPhamTheoLoai =
+                await _context.SanPhams
+                    .GroupBy(s => s.LoaiSanPham!.TenLoai)
+                    .Select(g => new SanPhamTheoLoaiDto
+                    {
+                        TenLoai = g.Key ?? "Chưa phân loại",
+                        SoLuongSanPham = g.Count()
+                    })
+                    .ToListAsync();
+
+            // Thống kê đơn hàng theo trạng thái
+            viewModel.DonHangTheoTrangThai =
+                await _context.DonHangs
+                    .GroupBy(d => d.TrangThai)
+                    .Select(g => new DonHangTheoTrangThaiDto
+                    {
+                        TrangThai = g.Key ?? "Không xác định",
+                        SoLuongDon = g.Count()
+                    })
+                    .ToListAsync();
+
+            // Top 5 sản phẩm bán chạy
+            viewModel.SanPhamBanChay =
+                await _context.ChiTietDonHangs
+                    .Where(c =>
+                        c.DonHang!.TrangThai == "Đã hoàn thành")
+                    .GroupBy(c => c.SanPham!.TenSanPham)
+                    .Select(g => new SanPhamBanChayDto
+                    {
+                        TenSanPham = g.Key ?? "Không rõ",
+                        TongSoLuongBan =
+                            g.Sum(c => c.SoLuong),
+                        TongDoanhThu =
+                            g.Sum(c => c.ThanhTien)
+                    })
+                    .OrderByDescending(g => g.TongSoLuongBan)
+                    .Take(5)
+                    .ToListAsync();
+
+            // Doanh thu theo tháng
+            var rawDoanhThu =
+                await _context.DonHangs
+                    .Where(d =>
+                        d.TrangThai == "Đã hoàn thành")
+                    .GroupBy(d => new
+                    {
+                        d.NgayDat.Year,
+                        d.NgayDat.Month
+                    })
+                    .Select(g => new
+                    {
+                        Year = g.Key.Year,
+                        Month = g.Key.Month,
+                        DoanhThu =
+                            g.Sum(d => d.TongTien)
+                    })
+                    .OrderBy(g => g.Year)
+                    .ThenBy(g => g.Month)
+                    .ToListAsync();
+
+            viewModel.DoanhThuTheoThang =
+                rawDoanhThu.Select(x => new DoanhThuThangDto
                 {
-                    TenLoai = g.Key ?? "Chưa phân loại",
-                    SoLuongSanPham = g.Count()
-                })
-                .ToListAsync();
+                    ThangNam = $"{x.Month:D2}/{x.Year}",
+                    DoanhThu = x.DoanhThu
+                }).ToList();
 
-            // 2. Thống kê đơn hàng theo trạng thái (GROUP BY, Count)
-            viewModel.DonHangTheoTrangThai = await _context.DonHangs
-                .GroupBy(d => d.TrangThai)
-                .Select(g => new DonHangTheoTrangThaiDto
-                {
-                    TrangThai = g.Key ?? "Không xác định",
-                    SoLuongDon = g.Count()
-                })
-                .ToListAsync();
+            viewModel.TongDoanhThuTatCa =
+                viewModel.DoanhThuTheoThang
+                    .Sum(x => x.DoanhThu);
 
-            // 3. Thống kê Top 5 sản phẩm bán chạy nhất (Chỉ tính đơn "Đã hoàn thành")
-            viewModel.SanPhamBanChay = await _context.ChiTietDonHangs
-                .Where(c => c.DonHang!.TrangThai == "Đã hoàn thành")
-                .GroupBy(c => c.SanPham!.TenSanPham)
-                .Select(g => new SanPhamBanChayDto
-                {
-                    TenSanPham = g.Key ?? "Không rõ",
-                    TongSoLuongBan = g.Sum(c => c.SoLuong),
-                    TongDoanhThu = g.Sum(c => c.ThanhTien)
-                })
-                .OrderByDescending(g => g.TongSoLuongBan)
-                .Take(5)
-                .ToListAsync();
-
-            // 4. Thống kê doanh thu theo tháng (Chỉ tính đơn "Đã hoàn thành")
-            var rawDoanhThu = await _context.DonHangs
-                .Where(d => d.TrangThai == "Đã hoàn thành")
-                .GroupBy(d => new { d.NgayDat.Year, d.NgayDat.Month })
-                .Select(g => new {
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    DoanhThu = g.Sum(d => d.TongTien)
-                })
-                .OrderBy(g => g.Year)
-                .ThenBy(g => g.Month)
-                .ToListAsync();
-
-            viewModel.DoanhThuTheoThang = rawDoanhThu.Select(x => new DoanhThuThangDto
-            {
-                ThangNam = $"{x.Month:D2}/{x.Year}",
-                DoanhThu = x.DoanhThu
-            }).ToList();
-
-            // Tính tổng doanh thu toàn hệ thống từ các đơn hoàn thành
-            viewModel.TongDoanhThuTatCa = viewModel.DoanhThuTheoThang.Sum(x => x.DoanhThu);
-            viewModel.TongSoLuongDaBan = viewModel.SanPhamBanChay.Sum(x => x.TongSoLuongBan);
+            viewModel.TongSoLuongDaBan =
+                viewModel.SanPhamBanChay
+                    .Sum(x => x.TongSoLuongBan);
 
             return View(viewModel);
+        }
+
+        // ============================================
+        // 6. QUẢN LÝ KHÁCH HÀNG
+        // GET: /Admin/Customers
+        // ============================================
+        public async Task<IActionResult> Customers(string? q)
+        {
+            if (!CheckAdmin())
+                return RedirectToAction("Login", "Account");
+
+            var query = _context.KhachHangs
+                .Include(k => k.TaiKhoan)
+                .AsNoTracking()
+                .AsQueryable();
+
+            // Tìm kiếm theo họ tên, email,
+            // số điện thoại và tên đăng nhập
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim();
+
+                query = query.Where(k =>
+                    (k.HoTen != null &&
+                     k.HoTen.Contains(q)) ||
+
+                    (k.Email != null &&
+                     k.Email.Contains(q)) ||
+
+                    (k.SoDienThoai != null &&
+                     k.SoDienThoai.Contains(q)) ||
+
+                    (k.TaiKhoan != null &&
+                     k.TaiKhoan.TenDangNhap.Contains(q)));
+            }
+
+            ViewBag.Q = q;
+
+            var customers = await query
+                .OrderBy(k => k.MaKhachHang)
+                .ToListAsync();
+
+            return View(customers);
+        }
+
+        // ============================================
+        // 7. KHÓA / MỞ KHÓA KHÁCH HÀNG
+        // POST: /Admin/ToggleCustomerStatus
+        // ============================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleCustomerStatus(int id)
+        {
+            if (!CheckAdmin())
+                return RedirectToAction("Login", "Account");
+
+            var customer = await _context.KhachHangs
+                .Include(k => k.TaiKhoan)
+                .FirstOrDefaultAsync(
+                    k => k.MaKhachHang == id);
+
+            if (customer == null)
+            {
+                TempData["Error"] =
+                    "Không tìm thấy khách hàng.";
+
+                return RedirectToAction(nameof(Customers));
+            }
+
+            bool trangThaiMoi = !customer.TrangThai;
+
+            // Cập nhật trạng thái khách hàng
+            customer.TrangThai = trangThaiMoi;
+
+            // Đồng bộ với trạng thái tài khoản
+            if (customer.TaiKhoan != null)
+            {
+                customer.TaiKhoan.TrangThai = trangThaiMoi;
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = trangThaiMoi
+                ? $"Đã mở khóa khách hàng '{customer.HoTen}'."
+                : $"Đã khóa khách hàng '{customer.HoTen}'.";
+
+            return RedirectToAction(nameof(Customers));
         }
     }
 }
